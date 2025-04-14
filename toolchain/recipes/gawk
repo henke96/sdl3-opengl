@@ -1,0 +1,21 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="5.3.1"
+sha512="c6b4c50ce565e6355ca162955072471e37541c51855c0011e834243a7390db8811344b0c974335844770e408e1f63d72d0d81459a081c392e0245c726019eaff"
+
+DEPENDENCIES="make xz"
+
+recipe_start
+export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
+xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/gawk/gawk-$version.tar.xz" "$sha512")" | tar xf -
+cd "./gawk-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --disable-nls --without-libiconv-prefix --without-libintl-prefix
+make -j "$NUM_CPUS"
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

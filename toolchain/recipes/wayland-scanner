@@ -1,0 +1,24 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="1.23.1"
+sha512="818eda003e3f7aa15690eedb1ff227a6056b2ce54bf23d45ffe573dc40a914623c5a1358218b59444dcdc483db0503324f0d27091d0ea954412a8b290de5f50a"
+
+DEPENDENCIES="xz python meson samurai pkgconf libexpat"
+
+recipe_start
+export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/samurai/bin:$OUT/pkgconf/bin:$PATH"
+xz -d -c "$(recipe_download "https://gitlab.freedesktop.org/wayland/wayland/-/releases/$version/downloads/wayland-$version.tar.xz" "$sha512")" | tar xf -
+cd "./wayland-$version"
+
+export NINJA=samu
+meson setup -Dprefix="$OUT/$SCRIPT_NAME" -Dlibdir=lib -Dpkg_config_path="$OUT/libexpat/lib/pkgconfig" \
+-Ddocumentation=false -Ddtd_validation=false -Dtests=false -Dlibraries=false build
+
+meson compile -j "$NUM_CPUS" -C build
+meson install -C build
+
+rm -rf "$PWD"
+recipe_finish

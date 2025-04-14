@@ -1,0 +1,20 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="3.27.1"
+sha512="d8831105fed3772bcb821a2b184fe0ffbff15795a5b0a89f2ad1cb0372a40c8f22f2bab72c671a6d17464521b7337067df929a5c3ece99f84848cc3a2fe6716f"
+
+DEPENDENCIES="make"
+
+recipe_start
+export PATH="$OUT/make/bin:$PATH"
+gzip -d -c "$(recipe_download "https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version.tar.gz" "$sha512")" | tar xf -
+cd "./cmake-$version"
+
+./bootstrap --prefix="$OUT/$SCRIPT_NAME" --no-debugger --parallel="$NUM_CPUS" --generator="Unix Makefiles" -- -DCMAKE_USE_OPENSSL=OFF
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

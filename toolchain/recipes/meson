@@ -1,0 +1,21 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="1.7.0"
+sha512="a5d1f00b193ca37ae64f85c9dfc29a2661c167d82d9953b9acd1393b222b05fa5fc03ffdf00fd1ae7a2014da3a7366c35f70bf02e3204e929b74f7b00c17c840"
+
+recipe_start
+gzip -d -c "$(recipe_download "https://github.com/mesonbuild/meson/releases/download/$version/meson-$version.tar.gz" "$sha512")" | tar xf -
+mv "./meson-$version" ./bin
+mv ./bin/meson.py ./bin/meson
+
+# TODO upstream conditional import
+sed -e 's/import gzip//' ./bin/mesonbuild/mdist.py > ./sed.temp
+mv ./sed.temp ./bin/mesonbuild/mdist.py
+
+sed -e 's/mesonlib.is_freebsd()/state.environment.machines.host.is_freebsd()/' ./bin/mesonbuild/modules/pkgconfig.py > ./sed.temp
+mv ./sed.temp ./bin/mesonbuild/modules/pkgconfig.py
+
+recipe_finish

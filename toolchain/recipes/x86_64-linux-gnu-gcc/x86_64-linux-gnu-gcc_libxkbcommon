@@ -1,0 +1,39 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../../recipe.sh"
+
+version="xkbcommon-1.8.1"
+sha512="1f172d1521e096609aed77ac710a9ce6f178904c6026f2ff169882a65a48bdd98ab49ecb70bf3b249a59d5e0b73a6c2a982c71aee83ee7a3178ff10eb97cebb4"
+
+DEPENDENCIES="../python ../meson ../samurai ../bison x86_64-linux-gnu-gcc"
+
+recipe_start
+export PATH="$OUT/python/bin:$OUT/meson/bin:$OUT/samurai/bin:$OUT/bison/bin:$PATH"
+gzip -d -c "$(recipe_git_download "https://github.com/xkbcommon/libxkbcommon.git" "$version" "$sha512")" | tar xf -
+cd "./libxkbcommon.git-$version"
+
+cat >cross.txt <<END
+[binaries]
+c = '$OUT/x86_64-linux-gnu-gcc/usr/bin/x86_64-x-linux-gnu-gcc'
+cpp = ''
+ar = '$OUT/x86_64-linux-gnu-gcc/usr/bin/x86_64-x-linux-gnu-ar'
+strip = '$OUT/x86_64-linux-gnu-gcc/usr/bin/x86_64-x-linux-gnu-strip'
+pkg-config = ''
+
+[host_machine]
+system = 'linux'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
+END
+
+export NINJA=samu
+meson setup --cross-file ./cross.txt -Dprefix=/usr -Dc_args="-ffile-prefix-map=$OUT=." \
+-Denable-wayland=false -Denable-x11=false -Denable-xkbregistry=false build
+
+meson compile -j "$NUM_CPUS" -C build
+DESTDIR="$OUT/$SCRIPT_NAME" meson install -C build
+
+rm -rf "$PWD"
+recipe_finish

@@ -1,0 +1,21 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="3.8.2"
+sha512="d4d23af6671406e97257892f90651b67f2ab95219831372be032190b7156c10a3435d457857e677445df8b2327aacccc15344acbbc3808a6f332a93cce23b444"
+
+DEPENDENCIES="make xz m4"
+
+recipe_start
+export PATH="$OUT/make/bin:$OUT/xz/bin:$OUT/m4/bin:$PATH"
+xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/bison/bison-$version.tar.xz" "$sha512")" | tar xf -
+cd "./bison-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --disable-nls --disable-yacc --without-libiconv-prefix --without-libintl-prefix --without-libreadline-prefix --without-libtextstyle-prefix
+make -j "$NUM_CPUS"
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

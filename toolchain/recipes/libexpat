@@ -1,0 +1,22 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="2.7.1"
+version2="2_7_1"
+sha512="4c9a6c1c1769d2c4404da083dd3013dbc73883da50e2b7353db2349a420e9b6d27cac7dbcb645991d6c7cdbf79bd88486fc1ac353084ce48e61081fb56e13d46"
+
+DEPENDENCIES="make xz"
+
+recipe_start
+export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
+xz -d -c "$(recipe_download "https://github.com/libexpat/libexpat/releases/download/R_$version2/expat-$version.tar.xz" "$sha512")" | tar xf -
+cd "./expat-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --without-xmlwf --without-examples --without-tests --without-docbook
+make -j "$NUM_CPUS"
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

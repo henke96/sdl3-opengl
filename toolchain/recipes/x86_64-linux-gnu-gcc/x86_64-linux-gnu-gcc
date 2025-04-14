@@ -1,0 +1,10 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../../recipe.sh"
+
+DIR_DEPENDENCIES="../linux-gnu-gcc.inc"
+
+arch=x86_64
+linux_arch=x86_64
+. "$SCRIPT_DIR/../linux-gnu-gcc.inc/linux-gnu-gcc.sh"

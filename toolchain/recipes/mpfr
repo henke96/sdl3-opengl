@@ -1,0 +1,21 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="4.2.2"
+sha512="eb9e7f51b5385fb349cc4fba3a45ffdf0dd53be6dfc74932dc01258158a10514667960c530c47dd9dfc5aa18be2bd94859d80499844c5713710581e6ac6259a9"
+
+DEPENDENCIES="make xz gmp"
+
+recipe_start
+export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
+xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/mpfr/mpfr-$version.tar.xz" "$sha512")" | tar xf -
+cd "./mpfr-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --with-gmp="$OUT/gmp" --disable-dependency-tracking
+make -j "$NUM_CPUS"
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

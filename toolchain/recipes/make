@@ -1,0 +1,20 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="4.3"
+sha512="9a1185cc468368f4ec06478b1cfa343bf90b5cd7c92c0536567db0315b0ee909af53ecce3d44cfd93dd137dbca1ed13af5713e8663590c4fdd21ea635d78496b"
+
+recipe_start
+gzip -d -c "$(recipe_download "https://ftp.gnu.org/gnu/make/make-$version.tar.gz" "$sha512")" | tar xf -
+cd "./make-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --without-libiconv-prefix --without-libintl-prefix --without-guile --without-customs --without-dmalloc --disable-nls
+./build.sh
+mkdir "$OUT/$SCRIPT_NAME/bin"
+mv ./make "$OUT/$SCRIPT_NAME/bin/"
+ln -s make "$OUT/$SCRIPT_NAME/bin/gmake"
+
+rm -rf "$PWD"
+recipe_finish

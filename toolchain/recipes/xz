@@ -1,0 +1,20 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="5.4.3"
+sha512="aff0fe166af6df4491a6f5df2372cab100b081452461a0e8c6fd65b72af3f250f16c64d9fb8fd309141e9b9ae4e41649f48687cc29e63dd82f27f2eab19b4023"
+
+DEPENDENCIES="make"
+
+recipe_start
+export PATH="$OUT/make/bin:$PATH"
+gzip -d -c "$(recipe_download "https://github.com/tukaani-project/xz/releases/download/v$version/xz-$version.tar.gz" "$sha512")" | tar xf -
+cd "./xz-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-nls --disable-dependency-tracking --without-libiconv-prefix --without-libintl-prefix
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

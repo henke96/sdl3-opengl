@@ -1,0 +1,21 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="4.9"
+sha512="36157a4b4a2430cf421b7bd07f1675d680d9f1616be96cf6ad6ee74a9ec0fe695f8d0b1e1f0b008bbb33cc7fcde5e1c456359bbbc63f8aebdd4fedc3982cf6dc"
+
+DEPENDENCIES="make xz"
+
+recipe_start
+export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
+xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/sed/sed-$version.tar.xz" "$sha512")" | tar xf -
+cd "./sed-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --disable-threads --disable-acl --disable-nls --disable-rpath --disable-i18n --without-selinux --without-libiconv-prefix --without-libintl-prefix
+make -j "$NUM_CPUS"
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

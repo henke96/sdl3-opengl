@@ -1,0 +1,19 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="1.2"
+sha512="bbe6a582c34b04f1df53b76c1647aa3e03c4698ebf7591a203935f11ffa05971bbcb86dc1a8c06aeb904cdc741abb08918122810fc47216fed0a6d9f87fd1225"
+
+DEPENDENCIES="make"
+
+recipe_start
+export PATH="$OUT/make/bin:$PATH"
+gzip -d -c "$(recipe_download "https://github.com/michaelforney/samurai/releases/download/$version/samurai-$version.tar.gz" "$sha512")" | tar xf -
+cd "./samurai-$version"
+
+make -j "$NUM_CPUS" install PREFIX="$OUT/$SCRIPT_NAME"
+
+rm -rf "$PWD"
+recipe_finish
