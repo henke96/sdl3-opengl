@@ -2,8 +2,7 @@
 #include <stdlib.h>
 
 #include <SDL3/SDL.h>
-
-#include "glcorearb.h"
+#include <GL/glcorearb.h>
 
 int main(void) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
