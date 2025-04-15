@@ -99,7 +99,7 @@ int main(void) {
             }
         }
 
-        glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         if (!SDL_GL_SwapWindow(window)) {
             SDL_Log("SDL_GL_SwapWindow failed: %s", SDL_GetError());
