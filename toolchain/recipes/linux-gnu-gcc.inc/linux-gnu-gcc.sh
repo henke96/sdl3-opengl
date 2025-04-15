@@ -45,7 +45,7 @@ cd ./gcc-build
 --disable-fixincludes LDFLAGS="-Wl,-rpath,$OUT/gmp/lib,-rpath,$OUT/mpfr/lib,-rpath,$OUT/mpc/lib" CFLAGS_FOR_TARGET="-O2 -ffile-prefix-map=$OUT=."
 
 # Fake limits.h until we install real glibc headers.
-: >"$OUT/$SCRIPT_NAME/usr/include/limits.h"
+: > "$OUT/$SCRIPT_NAME/usr/include/limits.h"
 make -j "$NUM_CPUS" all-gcc
 make -j "$NUM_CPUS" install-gcc
 rm "$OUT/$SCRIPT_NAME/usr/include/limits.h"
@@ -70,7 +70,7 @@ make -j "$NUM_CPUS" install-headers csu/install-lib DESTDIR="$OUT/$SCRIPT_NAME"
 
 cd ../gcc-build
 
-: >"$OUT/$SCRIPT_NAME/usr/include/gnu/stubs.h"
+: > "$OUT/$SCRIPT_NAME/usr/include/gnu/stubs.h"
 make -j "$NUM_CPUS"
 make -j "$NUM_CPUS" install
 rm "$OUT/$SCRIPT_NAME/usr/include/gnu/stubs.h"

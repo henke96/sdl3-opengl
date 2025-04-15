@@ -73,7 +73,7 @@ $3  $recipe_temp-$2.tar.xz
 end
     then
         git -C "$recipe_outdir" clone --bare --depth 1 --branch "$2" "$1"
-        git -C "$recipe_outdir/$recipe_temp" archive --prefix "$recipe_temp-$2/" "$2" | xz >"$PWD/$recipe_temp-$2.tar.xz"
+        git -C "$recipe_outdir/$recipe_temp" archive --prefix "$recipe_temp-$2/" "$2" | xz > "$PWD/$recipe_temp-$2.tar.xz"
         sha512sum -c - >&2 <<end
 $3  $recipe_temp-$2.tar.xz
 end
