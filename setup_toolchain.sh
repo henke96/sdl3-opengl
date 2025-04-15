@@ -48,7 +48,7 @@ eval tc_downloads_directory="$tc_option"
 tc_downloads_directory="${tc_downloads_directory:-$tc_default}"
 test -d "$tc_downloads_directory" || { echo "ERROR: Directory doesn't exist"; return; }
 
-tc_default="${tc_host_c_compiler:-cc}"
+tc_default="${tc_host_c_compiler:-cc -std=gnu11}"
 tc_prompt="Host C compiler [$tc_default]: "
 if test "$tc_bash_read"; then read -rep "$tc_prompt" tc_option || { echo "ERROR"; return; } else { printf "$tc_prompt" && read -r tc_option; } || { echo "ERROR"; return; } fi
 tc_host_c_compiler="${tc_option:-$tc_default}"
