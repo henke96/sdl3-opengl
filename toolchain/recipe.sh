@@ -65,19 +65,19 @@ end
     printf "%s" "$PWD/$recipe_temp"
 }
 
-recipe_git_download() {
+recipe_git_xz_download() {
     cd "$recipe_DOWNLOADS"
     recipe_temp="${1##*/}"
     if ! sha512sum -c - >&2 <<end
-$3  $recipe_temp-$2.tar.gz
+$3  $recipe_temp-$2.tar.xz
 end
     then
         git -C "$recipe_outdir" clone --bare --depth 1 --branch "$2" "$1"
-        git -C "$recipe_outdir/$recipe_temp" archive --prefix "$recipe_temp-$2/" -o "$PWD/$recipe_temp-$2.tar.gz" "$2"
+        git -C "$recipe_outdir/$recipe_temp" archive --prefix "$recipe_temp-$2/" "$2" | xz >"$PWD/$recipe_temp-$2.tar.xz"
         sha512sum -c - >&2 <<end
-$3  $recipe_temp-$2.tar.gz
+$3  $recipe_temp-$2.tar.xz
 end
     fi
     rm -rf "$recipe_outdir/$recipe_temp"
-    printf "%s" "$PWD/$recipe_temp-$2.tar.gz"
+    printf "%s" "$PWD/$recipe_temp-$2.tar.xz"
 }
