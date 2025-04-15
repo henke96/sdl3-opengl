@@ -22,7 +22,7 @@ int main(void) {
     window = SDL_CreateWindow(
         "SDL3 OpenGL",
         800, 600,
-        SDL_WINDOW_OPENGL
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
     );
     if (!window) {
         SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
