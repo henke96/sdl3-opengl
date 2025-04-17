@@ -28,7 +28,7 @@ rm -rf ./linux-$linux_version
 xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/binutils/binutils-$binutils_version.tar.xz" "$binutils_sha512")" | tar xf -
 cd "./binutils-$binutils_version"
 ./configure --prefix="$OUT/$SCRIPT_NAME/usr" --target="$arch-x-linux-gnu" --with-sysroot="$OUT/$SCRIPT_NAME" --without-libiconv-prefix --without-libintl-prefix --without-zstd \
---disable-dependency-tracking --disable-werror --disable-nls
+--disable-dependency-tracking --disable-werror --disable-nls --enable-deterministic-archives
 
 make -j "$NUM_CPUS" all-binutils all-ld all-gas
 make -j "$NUM_CPUS" install-binutils install-ld install-gas
