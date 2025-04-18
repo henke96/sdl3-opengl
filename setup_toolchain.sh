@@ -19,16 +19,15 @@ Option: '
     esac
 done
 
-test "$tc_orig_path" || tc_orig_path="$PATH"
 if test "$tc_toolchain" = none; then
-    export PATH="$tc_orig_path"
-    printf "\nRestoring PATH\n"
     unset CC
-    echo "Clearing CC"
+    printf "\nClearing CC\n"
+    unset PKG_CONFIG
+    printf "Clearing PKG_CONFIG\n"
     unset PKG_CONFIG_PATH
-    echo "Clearing PKG_CONFIG_PATH"
+    printf "Clearing PKG_CONFIG_PATH\n"
     unset PKG_CONFIG_SYSROOT_DIR
-    echo "Clearing PKG_CONFIG_SYSROOT_DIR"
+    printf "Clearing PKG_CONFIG_SYSROOT_DIR\n"
 
     printf "\nEnvironment restored\n"
     return
@@ -68,12 +67,10 @@ tc_parallell_jobs="${tc_option:-$tc_default}"
 OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" NUM_CPUS="$tc_parallell_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sdl3" || return
 tc_out="$(cd -- "$tc_build_directory" && pwd)"
 
-tc_extra_path="$tc_out/make/bin:$tc_out/pkgconf/bin"
-export PATH="$tc_extra_path:$tc_orig_path"
-printf "\nPrepending to PATH: %s\n" "$tc_extra_path"
-
 export CC="$tc_out/$tc_toolchain/usr/bin/$tc_toolchain_cc"
-printf "Setting CC=%s\n" "$CC"
+printf "\nSetting CC=%s\n" "$CC"
+export PKG_CONFIG="$tc_out/pkgconf/bin/pkgconf"
+printf "Setting PKG_CONFIG=%s\n" "$PKG_CONFIG"
 export PKG_CONFIG_PATH="$tc_out/${tc_toolchain}_sdl3/usr/lib/pkgconfig"
 printf "Setting PKG_CONFIG_PATH=%s\n" "$PKG_CONFIG_PATH"
 export PKG_CONFIG_SYSROOT_DIR="$tc_out/${tc_toolchain}_sdl3"
