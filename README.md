@@ -1,4 +1,4 @@
 # SDL3 OpenGL
 `. setup_toolchain.sh`  
-`./build.sh`  
+`./src/build.sh`  
 `./sdl3-opengl`  

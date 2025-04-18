@@ -64,16 +64,16 @@ tc_prompt="Parallell jobs [$tc_default]: "
 if test "$tc_bash_read"; then read -rep "$tc_prompt" tc_option || { echo "ERROR"; return; } else { printf "$tc_prompt" && read -r tc_option; } || { echo "ERROR"; return; } fi
 tc_parallell_jobs="${tc_option:-$tc_default}"
 
-OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" NUM_CPUS="$tc_parallell_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sdl3" || return
+OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" NUM_CPUS="$tc_parallell_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sysroot" || return
 tc_out="$(cd -- "$tc_build_directory" && pwd)"
 
 export CC="$tc_out/$tc_toolchain/usr/bin/$tc_toolchain_cc"
 printf "\nSetting CC=%s\n" "$CC"
 export PKG_CONFIG="$tc_out/pkgconf/bin/pkgconf"
 printf "Setting PKG_CONFIG=%s\n" "$PKG_CONFIG"
-export PKG_CONFIG_PATH="$tc_out/${tc_toolchain}_sdl3/usr/lib/pkgconfig"
+export PKG_CONFIG_PATH="$tc_out/${tc_toolchain}_sysroot/usr/lib/pkgconfig"
 printf "Setting PKG_CONFIG_PATH=%s\n" "$PKG_CONFIG_PATH"
-export PKG_CONFIG_SYSROOT_DIR="$tc_out/${tc_toolchain}_sdl3"
+export PKG_CONFIG_SYSROOT_DIR="$tc_out/${tc_toolchain}_sysroot"
 printf "Setting PKG_CONFIG_SYSROOT_DIR=%s\n" "$PKG_CONFIG_SYSROOT_DIR"
 
 printf "\nEnvironment setup for toolchain %s\n" "$tc_toolchain"

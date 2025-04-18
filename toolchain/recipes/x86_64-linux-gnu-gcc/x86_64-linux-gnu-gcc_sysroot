@@ -1,0 +1,12 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../../recipe.sh"
+
+# Note that sdl3 already depends on khronos directory.
+DEPENDENCIES="x86_64-linux-gnu-gcc_sdl3"
+
+recipe_start
+(cd "$OUT/x86_64-linux-gnu-gcc_sdl3" && tar cf - usr) | tar xf -
+(cd "$SCRIPT_DIR/../../khronos" && tar cf - usr) | tar xf -
+recipe_finish

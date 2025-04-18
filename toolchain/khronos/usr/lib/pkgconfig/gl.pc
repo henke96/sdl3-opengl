@@ -1,7 +1,7 @@
 prefix=/usr
 includedir=${prefix}/include
 
-Name: EGL
-Description: EGL headers
-Version: 1.5
+Name: GL
+Description: GL headers
+Version: 1.2
 Cflags: -I${includedir}
