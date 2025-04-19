@@ -28,7 +28,7 @@ rm -rf ./linux-$linux_version
 xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/binutils/binutils-$binutils_version.tar.xz" "$binutils_sha512")" | tar xf -
 cd "./binutils-$binutils_version"
 ./configure --prefix="$OUT/$SCRIPT_NAME/usr" --target="$arch-x-linux-gnu" --with-sysroot="$OUT/$SCRIPT_NAME" --without-libiconv-prefix --without-libintl-prefix --without-zstd \
---disable-dependency-tracking --disable-werror --disable-nls --enable-deterministic-archives
+--disable-dependency-tracking --disable-werror --disable-nls --enable-deterministic-archives CFLAGS="-O2"
 
 make -j "$NUM_CPUS" all-binutils all-ld all-gas
 make -j "$NUM_CPUS" install-binutils install-ld install-gas
@@ -42,7 +42,7 @@ cd ./gcc-build
 
 "../gcc-$gcc_version/configure" --prefix="$OUT/$SCRIPT_NAME/usr" --target="$arch-x-linux-gnu" --with-glibc-version="$glibc_version" --with-sysroot="$OUT/$SCRIPT_NAME" --with-gmp="$OUT/gmp" --with-mpfr="$OUT/mpfr" --with-mpc="$OUT/mpc" --without-zstd \
 --enable-languages=c --disable-shared --disable-nls --disable-multilib --disable-libstdcxx --disable-bootstrap --disable-gcov --disable-lto --disable-libatomic --disable-decimal-float --disable-libgomp --disable-libquadmath --disable-libssp \
---disable-fixincludes LDFLAGS="-Wl,-rpath,$OUT/gmp/lib,-rpath,$OUT/mpfr/lib,-rpath,$OUT/mpc/lib" CFLAGS_FOR_TARGET="-O2 -ffile-prefix-map=$OUT=."
+--disable-fixincludes LDFLAGS="-Wl,-rpath,$OUT/gmp/lib,-rpath,$OUT/mpfr/lib,-rpath,$OUT/mpc/lib" CFLAGS="-O2" CXXFLAGS="-O2" CFLAGS_FOR_TARGET="-O2 -ffile-prefix-map=$OUT=."
 
 # Fake limits.h until we install real glibc headers.
 : > "$OUT/$SCRIPT_NAME/usr/include/limits.h"

@@ -29,7 +29,7 @@ endian = 'little'
 END
 
 export NINJA=samu
-meson setup --cross-file ./cross.txt -Dprefix=/usr -Dc_args="-ffile-prefix-map=$OUT=." \
+meson setup --cross-file ./cross.txt -Dprefix=/usr --buildtype=plain -Dc_args="-ffile-prefix-map=$OUT=." \
 -Dauto_features=disabled -Ddbus=disabled -Dexamples=disabled -Dflatpak=disabled \
 -Dsession-managers="[]" -Dtests=disabled build
 meson compile -j "$NUM_CPUS" -C build

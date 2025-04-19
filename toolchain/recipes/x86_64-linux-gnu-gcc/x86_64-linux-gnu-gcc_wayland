@@ -32,7 +32,7 @@ sys_root = '$OUT/x86_64-linux-gnu-gcc_libffi'
 END
 
 export NINJA=samu
-meson setup --cross-file ./cross.txt -Dprefix=/usr -Dc_args="-ffile-prefix-map=$OUT=." \
+meson setup --cross-file ./cross.txt -Dprefix=/usr --buildtype=plain -Dc_args="-ffile-prefix-map=$OUT=." \
 -Dpkg_config_path="$OUT/x86_64-linux-gnu-gcc_libffi/usr/lib/pkgconfig" -Dbuild.pkg_config_path="$OUT/wayland-scanner/lib/pkgconfig:$OUT/wayland-scanner/libdata/pkgconfig" \
 -Ddocumentation=false -Ddtd_validation=false -Dtests=false -Dscanner=false build
 
