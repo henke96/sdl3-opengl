@@ -46,7 +46,7 @@ DEP_CFLAGS="${DEP_CFLAGS-"-MD -MP"}"
 if test "$CONFIGURE"; then
     printf ".POSIX:\nsdl3-opengl:\n" > Makefile
 else
-    unset DEP_CFLAGS
+    DEP_CFLAGS=
 fi
 
 GL_CFLAGS="${GL_CFLAGS-"$("$PKG_CONFIG" --cflags gl)"}"
