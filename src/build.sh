@@ -35,7 +35,7 @@ wait_compile() {
     wait "$1"
     shift
     pids="$@"
-    started=$(($started-1))
+    running=$(($running-1))
 }
 
 CC="${CC:-cc}"
@@ -54,16 +54,16 @@ SDL3_CFLAGS="${SDL3_CFLAGS-"$("$PKG_CONFIG" --cflags sdl3)"}"
 SDL3_LIBS="${SDL3_LIBS-"$("$PKG_CONFIG" --libs sdl3)"}"
 
 c_sources="sdl3-opengl"
-objects=
 pids=
-started=0
+objects=
+running=0
 for source in $c_sources
 do
     compile "$source" &
     pids="$pids $!"
     objects="$objects $source.o"
-    started=$(($started+1))
-    test "$started" -lt "$PARALLEL" || wait_compile
+    running=$(($running+1))
+    test "$running" -lt "$PARALLEL" || wait_compile
 done
 for pid in $pids
 do
