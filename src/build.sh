@@ -70,7 +70,7 @@ do
     wait "$pid"
 done
 
-cmd="$CC -o sdl3-opengl $LDFLAGS $objects $SDL3_LIBS $LIBS"
+cmd="$CC -o sdl3-opengl $LDFLAGS$objects $SDL3_LIBS $LIBS"
 printf "%s\n" "$cmd"
 eval "$cmd"
-test "$CONFIGURE" && printf "sdl3-opengl: %s\n\t%s\nclean:\n\trm -f sdl3-opengl %s\n" "$objects" "$cmd" "$objects" >> Makefile
+test "$CONFIGURE" && printf "sdl3-opengl: %s\n\t%s\nclean:\n\trm -f sdl3-opengl%s\n" "$objects" "$cmd" "$objects" >> Makefile
