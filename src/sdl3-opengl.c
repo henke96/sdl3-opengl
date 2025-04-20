@@ -1,7 +1,8 @@
-#include <stdlib.h>
+#include "gl.h"
 
 #include <SDL3/SDL.h>
-#include <GL/glcorearb.h>
+
+#include <stdlib.h>
 
 int main(void) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
@@ -45,10 +46,9 @@ int main(void) {
         goto out;
     }
 
-    PFNGLCLEARCOLORPROC glClearColor = (PFNGLCLEARCOLORPROC)SDL_GL_GetProcAddress("glClearColor");
-    PFNGLCLEARPROC glClear = (PFNGLCLEARPROC)SDL_GL_GetProcAddress("glClear");
-    if (!glClearColor || !glClear) {
-        SDL_Log("SDL_GL_GetProcAddress failed: %s", SDL_GetError());
+    int status = gl_load();
+    if (status < 0) {
+        SDL_Log("gl_load failed: %d", status);
         goto out;
     }
 
@@ -85,7 +85,7 @@ int main(void) {
             float samples[512];
 
             for (size_t i = 0; i < SDL_arraysize(samples); ++i) {
-                float freq = 110.0f;
+                float freq = 440.0f;
                 float phase = (float)sine_sample * freq / 8000.0f;
                 samples[i] = SDL_sinf(phase * 2 * SDL_PI_F) / 20.0f;
                 sine_sample++;
