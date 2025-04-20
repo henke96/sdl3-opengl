@@ -23,13 +23,15 @@ CC="${CC:-cc}"
 PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
 
 DEP_CFLAGS="${DEP_CFLAGS-"-MD -MP"}"
-test "$CONFIGURE" || unset DEP_CFLAGS
+if test "$CONFIGURE"; then
+    printf ".POSIX:\nsdl3-opengl:\n" > Makefile
+else
+    unset DEP_CFLAGS
+fi
 
 GL_CFLAGS="${GL_CFLAGS-"$("$PKG_CONFIG" --cflags gl)"}"
 SDL3_CFLAGS="${SDL3_CFLAGS-"$("$PKG_CONFIG" --cflags sdl3)"}"
 SDL3_LIBS="${SDL3_LIBS-"$("$PKG_CONFIG" --libs sdl3)"}"
-
-test "$CONFIGURE" && printf ".POSIX:\nsdl3-opengl:\n" > Makefile
 
 c_sources="sdl3-opengl"
 objects=
