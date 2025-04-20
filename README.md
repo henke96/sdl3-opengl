@@ -12,8 +12,7 @@
 `PARALLEL=$(nproc) CFLAGS=-Os LDFLAGS=-s ../src/build.sh`  
 
 ## Configure a Makefile
-`. setup_toolchain.sh`  
 `mkdir build-dev`  
 `cd build-dev`  
-`PARALLEL=$(nproc) CONFIGURE=1 CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined" LDFLAGS="-fsanitize=undefined" ../src/build.sh`  
+`CONFIGURE=1 PARALLEL=$(nproc) CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined" LDFLAGS="-fsanitize=undefined" ../src/build.sh`  
 `make`  
