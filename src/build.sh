@@ -63,7 +63,7 @@ do
     pids="$pids $!"
     objects="$objects $source.o"
     started=$(($started+1))
-    test "$started" -ge "$PARALLEL" && wait_compile
+    test "$started" -lt "$PARALLEL" || wait_compile
 done
 for pid in $pids
 do
