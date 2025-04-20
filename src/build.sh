@@ -41,10 +41,9 @@ do
     printf "%s\n" "$cmd"
     eval "$cmd"
     if test "$CONFIGURE"; then
-        dep_cmd="mv $source.d $source.c.d"
+        dep_cmd="mv $source.d $source.o.d"
         eval "$dep_cmd"
-        printf "%s\n" "$dep_cmd"
-        printf "%s.o:\n\t%s\n\t%s\ninclude %s.c.d\n" "$source" "$cmd" "$dep_cmd" "$source" >> Makefile
+        printf "%s.o:\n\t%s\n\t@%s\ninclude %s.o.d\n" "$source" "$cmd" "$dep_cmd" "$source" >> Makefile
     fi
     objects="$source.o $objects"
 done
