@@ -1,4 +1,5 @@
-#include <GL/glcorearb.h>
+#define GL_GLES_PROTOTYPES 0
+#include <GLES3/gl3.h>
 
 extern PFNGLCLEARPROC glClear;
 extern PFNGLCLEARCOLORPROC glClearColor;

@@ -1,0 +1,7 @@
+prefix=/usr
+includedir=${prefix}/include
+
+Name: GLESv2
+Description: OpenGL ES v2/v3 headers
+Version: 3.0
+Cflags: -I${includedir}

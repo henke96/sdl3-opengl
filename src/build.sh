@@ -5,11 +5,12 @@ SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
 CC="${CC:-cc}"
 PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
 
+OUT="${OUT:-sdl3-opengl}"
 PARALLEL="${PARALLEL:-1}"
 DEP_CFLAGS="${DEP_CFLAGS-"-MD -MP"}"
 test "$CONFIGURE" || DEP_CFLAGS=
 
-GL_CFLAGS="${GL_CFLAGS-"$("$PKG_CONFIG" --cflags gl)"}"
+GLESV2_CFLAGS="${GLESV2_CFLAGS-"$("$PKG_CONFIG" --cflags glesv2)"}"
 SDL3_CFLAGS="${SDL3_CFLAGS-"$("$PKG_CONFIG" --cflags sdl3)"}"
 SDL3_LIBS="${SDL3_LIBS-"$("$PKG_CONFIG" --libs sdl3)"}"
 
@@ -31,7 +32,7 @@ escape() {
 }
 
 compile() {
-    cmd="$CC -c $DEP_CFLAGS $GL_CFLAGS $SDL3_CFLAGS $CFLAGS $(escape "$SCRIPT_DIR/$1.c")"
+    cmd="$CC -c $DEP_CFLAGS $GLESV2_CFLAGS $SDL3_CFLAGS $CFLAGS $(escape "$SCRIPT_DIR/$1.c")"
     printf "%s\n" "$cmd"
     eval "$cmd"
     if test "$CONFIGURE"; then
@@ -49,10 +50,9 @@ wait_compile() {
     running=$(($running-1))
 }
 
-test -z "$CONFIGURE" || printf ".POSIX:\nsdl3-opengl:\n" > Makefile
+test -z "$CONFIGURE" || printf ".POSIX:\n%s:\n" "$OUT" > Makefile
 
-main=sdl3-opengl
-c_sources="$main gl"
+c_sources="sdl3-opengl gl"
 pids=
 objects=
 running=0
@@ -69,7 +69,7 @@ do
     wait "$pid"
 done
 
-cmd="$CC -o $main $LDFLAGS$objects $SDL3_LIBS $LDLIBS"
+cmd="$CC -o $OUT $LDFLAGS$objects $SDL3_LIBS $LDLIBS"
 printf "%s\n" "$cmd"
 eval "$cmd"
-test -z "$CONFIGURE" || printf "%s: %s\n\t%s\nclean:\n\trm -f %s%s\n" "$main" "$objects" "$cmd" "$main" "$objects" >> Makefile
+test -z "$CONFIGURE" || printf "%s: %s\n\t%s\nclean:\n\trm -f %s%s\n" "$OUT" "$objects" "$cmd" "$OUT" "$objects" >> Makefile
