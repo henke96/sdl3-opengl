@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
 version="3.2.8"
 sha512="741550120f26fe983fa829d38d37ff4caeded31e899e4ded99ebb5b084eecebaa4081454b8e176e0103fa7faa6a230ad3f23f8c2453c6babfe59fab981cac6db"
 
-DEPENDENCIES="../make ../cmake ../pkgconf ../wayland-scanner x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc_libffi x86_64-linux-gnu-gcc_wayland x86_64-linux-gnu-gcc_libxkbcommon x86_64-linux-gnu-gcc_libpipewire"
+DEPENDENCIES="../make ../cmake ../pkgconf ../wayland-scanner x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc_libdecor x86_64-linux-gnu-gcc_libffi x86_64-linux-gnu-gcc_wayland x86_64-linux-gnu-gcc_libxkbcommon x86_64-linux-gnu-gcc_libpipewire"
 DIR_DEPENDENCIES="../../khronos/usr"
 
 recipe_start
@@ -17,6 +17,7 @@ cd "./SDL3-$version"
 mkdir ./sysroot
 cd ./sysroot
 (cd "$OUT/x86_64-linux-gnu-gcc_wayland" && tar cf - usr) | tar xf -
+(cd "$OUT/x86_64-linux-gnu-gcc_libdecor" && tar cf - usr) | tar xf -
 (cd "$OUT/x86_64-linux-gnu-gcc_libffi" && tar cf - usr) | tar xf -
 (cd "$OUT/x86_64-linux-gnu-gcc_libxkbcommon" && tar cf - usr) | tar xf -
 (cd "$OUT/x86_64-linux-gnu-gcc_libpipewire" && tar cf - usr) | tar xf -

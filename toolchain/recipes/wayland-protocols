@@ -1,0 +1,23 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="1.43"
+sha512="e568ef57d169235426044c1dcffe1e55daaa0ac6071e72e20e50f509d7d506a01fb49a394954308d5e8d329482e74d0d0a326f11e1c8b4c628453db2adea7274"
+
+DEPENDENCIES="xz python meson samurai pkgconf wayland-scanner"
+
+recipe_start
+export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/samurai/bin:$OUT/pkgconf/bin:$PATH"
+xz -d -c "$(recipe_download "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/$version/downloads/wayland-protocols-$version.tar.xz" "$sha512")" | tar xf -
+cd "./wayland-protocols-$version"
+
+export NINJA=samu
+meson setup -Dprefix=/usr -Dpkg_config_path="$OUT/wayland-scanner/lib/pkgconfig" \
+-Dtests=false build
+
+DESTDIR="$OUT/$SCRIPT_NAME" meson install -C build
+
+rm -rf "$PWD"
+recipe_finish
