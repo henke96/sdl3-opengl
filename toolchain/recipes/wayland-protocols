@@ -14,7 +14,7 @@ xz -d -c "$(recipe_download "https://gitlab.freedesktop.org/wayland/wayland-prot
 cd "./wayland-protocols-$version"
 
 export NINJA=samu
-meson setup -Dprefix=/usr -Dpkg_config_path="$OUT/wayland-scanner/lib/pkgconfig" \
+meson setup -Dprefix=/usr -Dpkg_config_path="$OUT/wayland-scanner/lib/pkgconfig:$OUT/wayland-scanner/libdata/pkgconfig" \
 -Dtests=false build
 
 DESTDIR="$OUT/$SCRIPT_NAME" meson install -C build
