@@ -54,14 +54,14 @@ recipe_finish() {
 recipe_download() {
     cd "$recipe_DOWNLOADS"
     recipe_temp="${1##*/}"
-    if ! sha512sum -c >&2 <<end && ! sha512 -c >&2 <<end2
+    if ! sha512sum -c - >&2 <<end && ! sha512 -c >&2 <<end2
 $2  $recipe_temp
 end
 SHA512 ($recipe_temp) = $2
 end2
     then
         wget -O "$recipe_temp" "$1" >&2 || ftp -o "$recipe_temp" "$1" >&2 || curl -o "$recipe_temp" "$1" >&2
-        sha512sum -c >&2 <<end || sha512 -c >&2 <<end2
+        sha512sum -c - >&2 <<end || sha512 -c >&2 <<end2
 $2  $recipe_temp
 end
 SHA512 ($recipe_temp) = $2
@@ -73,7 +73,7 @@ end2
 recipe_git_xz_download() {
     cd "$recipe_DOWNLOADS"
     recipe_temp="${1##*/}"
-    if ! sha512sum -c >&2 <<end && ! sha512 -c >&2 <<end2
+    if ! sha512sum -c - >&2 <<end && ! sha512 -c >&2 <<end2
 $3  $recipe_temp-$2.tar.xz
 end
 SHA512 ($recipe_temp-$2.tar.xz) = $3
@@ -81,7 +81,7 @@ end2
     then
         git -C "$recipe_outdir" clone --bare --depth 1 --branch "$2" "$1"
         git -C "$recipe_outdir/$recipe_temp" archive --prefix "$recipe_temp-$2/" "$2" | xz > "$PWD/$recipe_temp-$2.tar.xz"
-        sha512sum -c >&2 <<end || sha512 -c >&2 <<end2
+        sha512sum -c - >&2 <<end || sha512 -c >&2 <<end2
 $3  $recipe_temp-$2.tar.xz
 end
 SHA512 ($recipe_temp-$2.tar.xz) = $3
