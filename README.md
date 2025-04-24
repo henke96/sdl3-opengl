@@ -6,7 +6,7 @@
 `./sdl3-opengl`  
 
 ## Cross Build
-`. setup_toolchain.sh`  
+`. ./setup_toolchain.sh`  
 `mkdir build-cross`  
 `cd build-cross`  
 `PARALLEL=$(nproc) CFLAGS=-Os LDFLAGS=-s ../src/build.sh`  

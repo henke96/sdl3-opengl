@@ -14,7 +14,7 @@ export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
 xz -d -c "$(recipe_download "https://github.com/libexpat/libexpat/releases/download/R_$version2/expat-$version.tar.xz" "$sha512")" | tar xf -
 cd "./expat-$version"
 
-./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --without-xmlwf --without-examples --without-tests --without-docbook
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --disable-shared --without-xmlwf --without-examples --without-tests --without-docbook
 make -j "$NUM_CPUS"
 make -j "$NUM_CPUS" install
 
