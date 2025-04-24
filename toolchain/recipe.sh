@@ -21,10 +21,11 @@ recipe_start() {
     done
 
     # Check if the recipe needs to be rebuilt.
+    recipe_sha512="$(command -v sha512sum || command -v sha512)"
     if test -n "$DIR_DEPENDENCIES"; then
-        find $DIR_DEPENDENCIES -type d -print -o -exec sha512sum {} + | sort > "$recipe_outdir-dirdeps"
+        find $DIR_DEPENDENCIES -type d -print -o -exec "$recipe_sha512" {} + | sort > "$recipe_outdir-dirdeps"
     fi
-    if sha512sum -c "$recipe_outdir/sha512"; then
+    if "$recipe_sha512" -c "$recipe_outdir/sha512"; then
         echo "$recipe_TIMESTAMP" > "$recipe_outdir/sha512-timestamp"
         set +x
         echo "Already built $recipe_outdir"
@@ -37,12 +38,12 @@ recipe_start() {
 
 recipe_finish() {
     cd "$SCRIPT_DIR"
-    sha512sum "./$SCRIPT_NAME" > "$recipe_outdir/temp.sha512"
+    "$recipe_sha512" "./$SCRIPT_NAME" > "$recipe_outdir/temp.sha512"
     for recipe_temp in $DEPENDENCIES; do
-        sha512sum "$OUT/${recipe_temp##*/}/sha512" >> "$recipe_outdir/temp.sha512"
+        "$recipe_sha512" "$OUT/${recipe_temp##*/}/sha512" >> "$recipe_outdir/temp.sha512"
     done
     if test -n "$DIR_DEPENDENCIES"; then
-        sha512sum "$recipe_outdir-dirdeps" >> "$recipe_outdir/temp.sha512"
+        "$recipe_sha512" "$recipe_outdir-dirdeps" >> "$recipe_outdir/temp.sha512"
     fi
     mv "$recipe_outdir/temp.sha512" "$recipe_outdir/sha512"
     echo "$recipe_TIMESTAMP" > "$recipe_outdir/sha512-timestamp"
@@ -53,14 +54,18 @@ recipe_finish() {
 recipe_download() {
     cd "$recipe_DOWNLOADS"
     recipe_temp="${1##*/}"
-    if ! sha512sum -c - >&2 <<end
+    if ! sha512sum -c >&2 <<end && ! sha512 -c >&2 <<end2
 $2  $recipe_temp
 end
+SHA512 ($recipe_temp) = $2
+end2
     then
-        wget -O "$recipe_temp" "$1" >&2 || fetch -o "$recipe_temp" "$1" >&2
-        sha512sum -c - >&2 <<end
+        wget -O "$recipe_temp" "$1" >&2 || ftp -o "$recipe_temp" "$1" >&2 || curl -o "$recipe_temp" "$1" >&2
+        sha512sum -c >&2 <<end || sha512 -c >&2 <<end2
 $2  $recipe_temp
 end
+SHA512 ($recipe_temp) = $2
+end2
     fi
     printf "%s" "$PWD/$recipe_temp"
 }
@@ -68,15 +73,19 @@ end
 recipe_git_xz_download() {
     cd "$recipe_DOWNLOADS"
     recipe_temp="${1##*/}"
-    if ! sha512sum -c - >&2 <<end
+    if ! sha512sum -c >&2 <<end && ! sha512 -c >&2 <<end2
 $3  $recipe_temp-$2.tar.xz
 end
+SHA512 ($recipe_temp-$2.tar.xz) = $3
+end2
     then
         git -C "$recipe_outdir" clone --bare --depth 1 --branch "$2" "$1"
         git -C "$recipe_outdir/$recipe_temp" archive --prefix "$recipe_temp-$2/" "$2" | xz > "$PWD/$recipe_temp-$2.tar.xz"
-        sha512sum -c - >&2 <<end
+        sha512sum -c >&2 <<end || sha512 -c >&2 <<end2
 $3  $recipe_temp-$2.tar.xz
 end
+SHA512 ($recipe_temp-$2.tar.xz) = $3
+end2
     fi
     rm -rf "$recipe_outdir/$recipe_temp"
     printf "%s" "$PWD/$recipe_temp-$2.tar.xz"
