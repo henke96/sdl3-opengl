@@ -57,7 +57,7 @@ tc_prompt="Host C++ compiler [$tc_default]: "
 if test "$tc_bash_read"; then read -rep "$tc_prompt" tc_option || { echo "ERROR"; return; } else { printf "$tc_prompt" && read -r tc_option; } || { echo "ERROR"; return; } fi
 tc_host_cxx_compiler="${tc_option:-$tc_default}"
 
-tc_default="$(getconf _NPROCESSORS_ONLN 2>/dev/null)"
+tc_default="$(getconf NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null)"
 tc_default="${tc_default:-1}"
 tc_default="${tc_parallell_jobs:-$tc_default}"
 tc_prompt="Parallell jobs [$tc_default]: "
