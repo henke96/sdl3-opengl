@@ -60,7 +60,7 @@ end
 SHA512 ($recipe_temp) = $2
 end2
     then
-        wget -O "$recipe_temp" "$1" >&2 || ftp -o "$recipe_temp" "$1" >&2 || curl -o "$recipe_temp" "$1" >&2
+        wget -O "$recipe_temp" "$1" >&2 || fetch -o "$recipe_temp" "$1" >&2 || ftp -o "$recipe_temp" "$1" >&2 || curl -o "$recipe_temp" "$1" >&2
         sha512sum -c - >&2 <<end || sha512 -c >&2 <<end2
 $2  $recipe_temp
 end
