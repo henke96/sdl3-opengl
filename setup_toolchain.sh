@@ -59,12 +59,12 @@ tc_host_cxx_compiler="${tc_option:-$tc_default}"
 
 tc_default="$(getconf NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null)"
 tc_default="${tc_default:-1}"
-tc_default="${tc_parallell_jobs:-$tc_default}"
-tc_prompt="Parallell jobs [$tc_default]: "
+tc_default="${tc_parallel_jobs:-$tc_default}"
+tc_prompt="Parallel jobs [$tc_default]: "
 if test "$tc_bash_read"; then read -rep "$tc_prompt" tc_option || { echo "ERROR"; return; } else { printf "$tc_prompt" && read -r tc_option; } || { echo "ERROR"; return; } fi
-tc_parallell_jobs="${tc_option:-$tc_default}"
+tc_parallel_jobs="${tc_option:-$tc_default}"
 
-OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" NUM_CPUS="$tc_parallell_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sysroot" || return
+OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" NUM_CPUS="$tc_parallel_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sysroot" || return
 tc_out="$(cd -- "$tc_build_directory" && pwd)"
 
 export CC="$tc_out/$tc_toolchain/usr/bin/$tc_toolchain_cc"

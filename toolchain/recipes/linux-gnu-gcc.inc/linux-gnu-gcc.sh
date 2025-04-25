@@ -37,6 +37,11 @@ cd ..
 rm -rf "./binutils-$binutils_version"
 
 xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/gcc/gcc-$gcc_version/gcc-$gcc_version.tar.xz" "$gcc_sha512")" | tar xf -
+
+# Remove bad SIZE_MAX macro from generated flex code.
+sed -e 's/#define SIZE_MAX               (~(size_t)0)//' "gcc-$gcc_version/gcc/gengtype-lex.cc" > sed.temp
+mv sed.temp "gcc-$gcc_version/gcc/gengtype-lex.cc"
+
 mkdir ./gcc-build
 cd ./gcc-build
 
