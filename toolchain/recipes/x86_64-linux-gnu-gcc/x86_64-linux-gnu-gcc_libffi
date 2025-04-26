@@ -13,7 +13,7 @@ export PATH="$OUT/make/bin:$OUT/x86_64-linux-gnu-gcc/usr/bin:$PATH"
 gzip -d -c "$(recipe_download "https://github.com/libffi/libffi/releases/download/v$version/libffi-$version.tar.gz" "$sha512")" | tar xf -
 cd "./libffi-$version"
 
-./configure --prefix=/usr --build="$(sh ./config.guess)" --host="x86_64-x-linux-gnu" --disable-dependency-tracking CC= CPP= CXX=false CFLAGS="-ffile-prefix-map=$OUT=."
+./configure --prefix=/usr --build="$(sh ./config.guess)" --host="x86_64-x-linux-gnu" --disable-dependency-tracking CC= CPP= CXX=no CFLAGS="-ffile-prefix-map=$OUT=."
 
 make -j "$NUM_CPUS"
 make -j "$NUM_CPUS" install DESTDIR="$OUT/$SCRIPT_NAME"
