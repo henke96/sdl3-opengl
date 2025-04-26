@@ -11,8 +11,8 @@
 `cd build-cross`  
 `PARALLEL=8 CFLAGS=-Os LDFLAGS=-s ../src/build.sh`  
 
-## Configure a Makefile
+## Generate a Makefile
 `mkdir build-dev`  
 `cd build-dev`  
-`CONFIGURE=1 PARALLEL=8 CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address" ../src/build.sh`  
+`MAKEFILE=1 PARALLEL=8 CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address" ../src/build.sh`  
 `make`  
