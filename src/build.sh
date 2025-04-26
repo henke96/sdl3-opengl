@@ -29,9 +29,9 @@ SDL3_LIBS
         eval 'env_vars="$env_vars${'"$env_var"'+"'"$env_var"'=$(escape "$'"$env_var"'") "}"'
     done
 
-    printf '#!/bin/sh\nexec env -i DIRECT_BUILD="$DIRECT_BUILD" PATH="$PATH" TERM="$TERM" SOURCE_DATE_EPOCH=0 TZ=UTC0 LC_ALL=C \\\n%ssh %s\n' "$env_vars" "$(escape "$0")" > rebuild.sh
+    printf '#!/bin/sh\n%sexec sh %s\n' "$env_vars" "$(escape "$0")" > rebuild.sh
     chmod a+x ./rebuild.sh
-    DIRECT_BUILD=1 exec sh ./rebuild.sh
+    eval 'exec env -i DIRECT_BUILD=1 PATH="$PATH" TERM="$TERM" SOURCE_DATE_EPOCH=0 TZ=UTC0 LC_ALL=C '"$env_vars" sh ./rebuild.sh
 fi
 
 CC="${CC:-cc}"
