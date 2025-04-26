@@ -61,7 +61,7 @@ xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/glibc/glibc-$glibc_version.
 # Fix check on FreeBSD where wc -l output is indented (TODO upstream)
 sed -e 's/"$count" = 1/"$count" -eq 1/' ./glibc-$glibc_version/sysdeps/x86/configure > ./sed.temp
 mv ./sed.temp ./glibc-$glibc_version/sysdeps/x86/configure
-chmod +x ./glibc-$glibc_version/sysdeps/x86/configure
+chmod a+x ./glibc-$glibc_version/sysdeps/x86/configure
 
 mkdir glibc-build
 cd ./glibc-build

@@ -14,6 +14,5 @@
 ## Configure a Makefile
 `mkdir build-dev`  
 `cd build-dev`  
-`echo 'CONFIGURE=1 PARALLEL=8 CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address" ../src/build.sh' > configure.sh`  
-`sh configure.sh`  
+`CONFIGURE=1 PARALLEL=8 CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address" ../src/build.sh`  
 `make`  

@@ -35,6 +35,7 @@ PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
 
 int gl_load(void) {
     void *fn;
+
     gl_LOAD(glClear);
     gl_LOAD(glClearColor);
     gl_LOAD(glDisable);
@@ -63,5 +64,6 @@ int gl_load(void) {
     gl_LOAD(glGenVertexArrays);
     gl_LOAD(glDrawElementsInstanced);
     gl_LOAD(glVertexAttribDivisor);
+
     return 0;
 }
