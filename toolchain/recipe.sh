@@ -10,7 +10,7 @@ recipe_start() {
         test "$OUT" != "$SCRIPT_DIR"
         DOWNLOADS="$(cd -- "${DOWNLOADS:-"$OUT"}" && pwd)"
         # Run ourself with a clean environment.
-        exec env -i recipe_TIMESTAMP="$(date)" recipe_DOWNLOADS="$DOWNLOADS" OUT="$OUT" NUM_CPUS="${NUM_CPUS:-1}" CC="${CC:-cc}" CXX="${CXX:-c++}" PATH="$PATH" TERM="$TERM" SOURCE_DATE_EPOCH=0 TZ=UTC0 LC_ALL=C sh "$SCRIPT_DIR/$SCRIPT_NAME"
+        exec env -i recipe_TIMESTAMP="$(date)" recipe_DOWNLOADS="$DOWNLOADS" OUT="$OUT" NUM_CPUS="${NUM_CPUS:-1}" CC="${CC:-cc}" CXX="${CXX:-c++}" PATH="$PATH" TERM="$TERM" TMPDIR="$TMPDIR" SOURCE_DATE_EPOCH=0 TZ=UTC0 LC_ALL=C sh "$SCRIPT_DIR/$SCRIPT_NAME"
     fi
     cd "$SCRIPT_DIR"
     recipe_outdir="$OUT/$SCRIPT_NAME"
@@ -60,7 +60,7 @@ end
 SHA512 ($recipe_temp) = $2
 end2
     then
-        wget -O "$recipe_temp" "$1" >&2 || fetch -o "$recipe_temp" "$1" >&2 || ftp -o "$recipe_temp" "$1" >&2 || curl -o "$recipe_temp" "$1" >&2
+        wget -O "$recipe_temp" "$1" >&2 || fetch -o "$recipe_temp" "$1" >&2 || ftp -o "$recipe_temp" "$1" >&2 || curl -Lo "$recipe_temp" "$1" >&2
         sha512sum -c - >&2 <<end || sha512 -c >&2 <<end2
 $2  $recipe_temp
 end
