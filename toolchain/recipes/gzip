@@ -1,0 +1,21 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="1.14"
+sha512="82aef53188b3e69b51b7ddab5b8c44a11a5b73c0039b22a315a0c7d244694feab0146748add4265901eb1b4c0cee8a9eb69594995f098830d964091af97079c5"
+
+DEPENDENCIES="make xz"
+
+recipe_start
+export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
+xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/gzip/gzip-$version.tar.xz" "$sha512")" | tar xf -
+cd "./gzip-$version"
+
+./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking
+make -j "$NUM_CPUS"
+make -j "$NUM_CPUS" install
+
+rm -rf "$PWD"
+recipe_finish

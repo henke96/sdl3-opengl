@@ -9,7 +9,7 @@ sha512="818eda003e3f7aa15690eedb1ff227a6056b2ce54bf23d45ffe573dc40a914623c5a1358
 DEPENDENCIES="../xz ../python ../meson ../samurai ../pkgconf ../wayland-scanner x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc_libffi"
 
 recipe_start
-export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/samurai/bin:$OUT/pkgconf/bin:$PATH"
+export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/pkgconf/bin:$PATH"
 xz -d -c "$(recipe_download "https://gitlab.freedesktop.org/wayland/wayland/-/releases/$version/downloads/wayland-$version.tar.xz" "$sha512")" | tar xf -
 cd "./wayland-$version"
 
@@ -31,7 +31,7 @@ endian = 'little'
 sys_root = '$OUT/x86_64-linux-gnu-gcc_libffi'
 END
 
-export NINJA=samu
+export NINJA="$OUT/samurai/bin/samu"
 meson setup --cross-file ./cross.txt -Dprefix=/usr --buildtype=plain -Dc_args="-ffile-prefix-map=$OUT=." \
 -Dpkg_config_path="$OUT/x86_64-linux-gnu-gcc_libffi/usr/lib/pkgconfig" -Dbuild.pkg_config_path="$OUT/wayland-scanner/lib/pkgconfig:$OUT/wayland-scanner/libdata/pkgconfig" \
 -Ddocumentation=false -Ddtd_validation=false -Dtests=false -Dscanner=false build

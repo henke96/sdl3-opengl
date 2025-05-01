@@ -9,11 +9,11 @@ sha512="e568ef57d169235426044c1dcffe1e55daaa0ac6071e72e20e50f509d7d506a01fb49a39
 DEPENDENCIES="xz python meson samurai pkgconf wayland-scanner"
 
 recipe_start
-export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/samurai/bin:$OUT/pkgconf/bin:$PATH"
+export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/pkgconf/bin:$PATH"
 xz -d -c "$(recipe_download "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/$version/downloads/wayland-protocols-$version.tar.xz" "$sha512")" | tar xf -
 cd "./wayland-protocols-$version"
 
-export NINJA=samu
+export NINJA="$OUT/samurai/bin/samu"
 meson setup -Dprefix=/usr -Dpkg_config_path="$OUT/wayland-scanner/lib/pkgconfig:$OUT/wayland-scanner/libdata/pkgconfig" \
 -Dtests=false build
 

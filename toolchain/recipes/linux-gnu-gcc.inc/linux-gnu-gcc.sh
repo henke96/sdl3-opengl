@@ -8,10 +8,10 @@ gcc_sha512="932bdef0cda94bacedf452ab17f103c0cb511ff2cec55e9112fc0328cbf1d803b425
 glibc_version="2.36"
 glibc_sha512="9ea0bbda32f83a85b7da0c34f169607fb8a102f0a11a914e6bf531be47d1bef4f5307128286cffa1e2dc5879f0e6ccaef527dd353486883fa332a0b44bde8b3e"
 
-DEPENDENCIES="../make ../xz ../python ../bison ../gawk ../sed ../grep ../gmp ../mpfr ../mpc"
+DEPENDENCIES="../make ../xz ../python ../gzip ../bison ../gawk ../sed ../grep ../gmp ../mpfr ../mpc"
 
 recipe_start
-export PATH="$OUT/make/bin:$OUT/xz/bin:$OUT/python/bin:$OUT/bison/bin:$OUT/gawk/bin:$OUT/sed/bin:$OUT/grep/bin:$PATH"
+export PATH="$OUT/make/bin:$OUT/xz/bin:$OUT/python/bin:$OUT/gzip/bin:$OUT/bison/bin:$OUT/gawk/bin:$OUT/sed/bin:$OUT/grep/bin:$PATH"
 
 xz -d -c "$(recipe_download "https://kernel.org/pub/linux/kernel/v6.x/linux-$linux_version.tar.xz" "$linux_sha512")" | tar xf -
 cd ./linux-$linux_version

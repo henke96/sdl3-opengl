@@ -9,7 +9,7 @@ sha512="b4fd3d22bbc61cd7b0bfc70b1cd89bea60d563de0e7716d87e2e1a6ad32d3dec9850396a
 DEPENDENCIES="../xz ../python ../meson ../samurai ../pkgconf ../wayland-protocols x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc_wayland"
 
 recipe_start
-export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/samurai/bin:$OUT/wayland-scanner/bin:$PATH"
+export PATH="$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$OUT/wayland-scanner/bin:$PATH"
 xz -d -c "$(recipe_download "https://gitlab.freedesktop.org/-/project/18349/uploads/ee5ef0f2c3a4743e8501a855d61cb397/libdecor-$version.tar.xz" "$sha512")" | tar xf -
 cd "./libdecor-$version"
 
@@ -42,7 +42,7 @@ END
 sed -e "s/subdir('plugins')//" ./src/meson.build > ./sed.temp
 mv ./sed.temp ./src/meson.build
 
-export NINJA=samu
+export NINJA="$OUT/samurai/bin/samu"
 meson setup --cross-file ./cross.txt -Dprefix=/usr --buildtype=plain -Dc_args="-ffile-prefix-map=$OUT=." \
 -Dpkg_config_path="$PWD/sysroot/usr/lib/pkgconfig:$PWD/sysroot/usr/share/pkgconfig" \
 -Ddbus=disabled -Ddemo=false build

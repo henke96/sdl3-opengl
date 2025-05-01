@@ -6,17 +6,20 @@ SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
 version="2.4.3"
 sha512="7e59b6aaf875ec3fc8c225985937384d2aef57d9daf64b7ea88242bf1a11349fe52cf6d1238d728f0509599982d69c761a0f01e8f8e24de028db58288760896f"
 
-DEPENDENCIES="make xz"
+DEPENDENCIES="make xz python meson samurai"
 
 recipe_start
-export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
+export PATH="$OUT/make/bin:$OUT/xz/bin:$OUT/python/bin:$OUT/meson/bin:$PATH"
 xz -d -c "$(recipe_download "https://distfiles.ariadne.space/pkgconf/pkgconf-$version.tar.xz" "$sha512")" | tar xf -
 cd "./pkgconf-$version"
 
-./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking \
---with-sysroot=/path/that/doesnt/exist --with-personality-dir=/path/that/doesnt/exist --with-pkg-config-dir=/path/that/doesnt/exist --with-system-libdir=/path/that/doesnt/exist --with-system-includedir=/path/that/doesnt/exist
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+export NINJA="$OUT/samurai/bin/samu"
+meson setup -Dprefix="$OUT/$SCRIPT_NAME" -Dlibdir=lib -Ddefault_library=static \
+-Dtests=disabled -Dwith-system-includedir=/path/that/doesnt/exist -Dwith-system-libdir=/path/that/doesnt/exist build
+
+meson compile -j "$NUM_CPUS" -C build
+meson install -C build
+
 ln -s pkgconf "$OUT/$SCRIPT_NAME/bin/pkg-config"
 
 rm -rf "$PWD"
