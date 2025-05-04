@@ -2,5 +2,5 @@
 set -ex
 SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
 
-arch=x86_64
+arch=aarch64
 . "$SCRIPT_DIR/../inc/linux-gnu-gcc_wayland/linux-gnu-gcc_wayland.sh"

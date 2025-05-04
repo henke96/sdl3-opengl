@@ -2,6 +2,6 @@
 set -ex
 SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
 
-arch=x86_64
-linux_arch=x86_64
+arch=riscv64
+linux_arch=riscv
 . "$SCRIPT_DIR/../inc/linux-gnu-gcc/linux-gnu-gcc.sh"

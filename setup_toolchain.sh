@@ -8,6 +8,8 @@ while test -z "$tc_toolchain"; do
     printf "%s" 'Select a toolchain:
     0) none (restore environment)
     1) x86_64-linux-gnu-gcc
+    2) aarch64-linux-gnu-gcc
+    3) riscv64-linux-gnu-gcc
 Option: '
     read tc_option
     case "$tc_option" in
@@ -15,6 +17,14 @@ Option: '
         1)
             tc_toolchain=x86_64-linux-gnu-gcc
             tc_toolchain_cc=x86_64-x-linux-gnu-gcc
+            ;;
+        2)
+            tc_toolchain=aarch64-linux-gnu-gcc
+            tc_toolchain_cc=aarch64-x-linux-gnu-gcc
+            ;;
+        3)
+            tc_toolchain=riscv64-linux-gnu-gcc
+            tc_toolchain_cc=riscv64-x-linux-gnu-gcc
             ;;
     esac
 done

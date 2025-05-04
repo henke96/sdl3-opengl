@@ -1,4 +1,4 @@
-# Inputs: $arch, $linux_arch
+# Inputs: $SCRIPT_DIR, $arch, $linux_arch
 linux_version="6.1.131"
 linux_sha512="4fc8628e8593e7a713dbaba23f5f46eb94813d3a34791bbfd643d719e572ca4c2afa0b1e2b43dc3a664a9a2dca4d3c4145cd3c457636537022d52003d8b979cf"
 binutils_version="2.44"
@@ -8,7 +8,9 @@ gcc_sha512="932bdef0cda94bacedf452ab17f103c0cb511ff2cec55e9112fc0328cbf1d803b425
 glibc_version="2.36"
 glibc_sha512="9ea0bbda32f83a85b7da0c34f169607fb8a102f0a11a914e6bf531be47d1bef4f5307128286cffa1e2dc5879f0e6ccaef527dd353486883fa332a0b44bde8b3e"
 
+. "$SCRIPT_DIR/../../recipe.sh"
 DEPENDENCIES="../make ../xz ../python ../gzip ../bison ../gawk ../sed ../grep ../gmp ../mpfr ../mpc"
+DIR_DEPENDENCIES="../inc/linux-gnu-gcc"
 
 recipe_start
 export PATH="$OUT/make/bin:$OUT/xz/bin:$OUT/python/bin:$OUT/gzip/bin:$OUT/bison/bin:$OUT/gawk/bin:$OUT/sed/bin:$OUT/grep/bin:$PATH"
