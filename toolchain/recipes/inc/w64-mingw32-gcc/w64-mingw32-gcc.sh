@@ -7,11 +7,11 @@ mingw_version="12.0.0"
 mingw_sha512="949b2bfab8763ab10ec4e9fdfdaf5361517a4ab787fb98ab419b38d02694061c2e821ebbf6e2e4b39d92bdf17419d116daa8e63afd9e01d11592f39df4da69d7"
 
 . "$SCRIPT_DIR/../../recipe.sh"
-DEPENDENCIES="../make ../xz ../gmp ../mpfr ../mpc"
+DEPENDENCIES="../make ../xz ../bzip2 ../gmp ../mpfr ../mpc"
 DIR_DEPENDENCIES="../inc/w64-mingw32-gcc"
 
 recipe_start
-export PATH="$OUT/make/bin:$OUT/xz/bin:$PATH"
+export PATH="$OUT/make/bin:$OUT/xz/bin:$OUT/bzip2/bin:$PATH"
 
 xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/binutils/binutils-$binutils_version.tar.xz" "$binutils_sha512")" | tar xf -
 cd "./binutils-$binutils_version"

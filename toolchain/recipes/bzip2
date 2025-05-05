@@ -1,0 +1,19 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/../recipe.sh"
+
+version="1.0.8"
+sha512="083f5e675d73f3233c7930ebe20425a533feedeaaa9d8cc86831312a6581cefbe6ed0d08d2fa89be81082f2a5abdabca8b3c080bf97218a1bd59dc118a30b9f3"
+
+DEPENDENCIES="make"
+
+recipe_start
+export PATH="$OUT/make/bin:$PATH"
+gzip -d -c "$(recipe_download "https://sourceware.org/pub/bzip2/bzip2-$version.tar.gz" "$sha512")" | tar xf -
+cd "./bzip2-$version"
+
+make -j "$NUM_CPUS" install PREFIX="$OUT/$SCRIPT_NAME" CC="$CC" RANLIB=true
+
+rm -rf "$PWD"
+recipe_finish
