@@ -23,6 +23,7 @@ recipe_start() {
     # Check if the recipe needs to be rebuilt.
     recipe_sha512="$(command -v sha512sum || command -v sha512)"
     if test -n "$DIR_DEPENDENCIES"; then
+        ls $DIR_DEPENDENCIES > /dev/null
         find $DIR_DEPENDENCIES -type d -print -o -exec "$recipe_sha512" {} + | sort > "$recipe_outdir-dirdeps"
     fi
     if "$recipe_sha512" -c "$recipe_outdir/sha512"; then

@@ -10,21 +10,26 @@ while test -z "$tc_toolchain"; do
     1) x86_64-linux-gnu-gcc
     2) aarch64-linux-gnu-gcc
     3) riscv64-linux-gnu-gcc
+    4) x86_64-w64-mingw32-gcc
 Option: '
     read tc_option
     case "$tc_option" in
         0) tc_toolchain=none ;;
         1)
             tc_toolchain=x86_64-linux-gnu-gcc
-            tc_toolchain_cc=x86_64-x-linux-gnu-gcc
+            tc_toolchain_cc=/usr/bin/x86_64-x-linux-gnu-gcc
             ;;
         2)
             tc_toolchain=aarch64-linux-gnu-gcc
-            tc_toolchain_cc=aarch64-x-linux-gnu-gcc
+            tc_toolchain_cc=/usr/bin/aarch64-x-linux-gnu-gcc
             ;;
         3)
             tc_toolchain=riscv64-linux-gnu-gcc
-            tc_toolchain_cc=riscv64-x-linux-gnu-gcc
+            tc_toolchain_cc=/usr/bin/riscv64-x-linux-gnu-gcc
+            ;;
+        4)
+            tc_toolchain=x86_64-w64-mingw32-gcc
+            tc_toolchain_cc=/bin/x86_64-w64-mingw32-gcc
             ;;
     esac
 done
@@ -77,7 +82,7 @@ tc_parallel_jobs="${tc_option:-$tc_default}"
 OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" NUM_CPUS="$tc_parallel_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sysroot" || return
 tc_out="$(cd -- "$tc_build_directory" && pwd)"
 
-export CC="$tc_out/$tc_toolchain/usr/bin/$tc_toolchain_cc"
+export CC="$tc_out/$tc_toolchain$tc_toolchain_cc"
 printf "\nSetting CC=%s\n" "$CC"
 export PKG_CONFIG="$tc_out/pkgconf/bin/pkgconf"
 printf "Setting PKG_CONFIG=%s\n" "$PKG_CONFIG"
