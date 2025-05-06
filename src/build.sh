@@ -31,7 +31,7 @@ SDL3_LIBS
 
     printf '#!/bin/sh\n%sexec sh %s\n' "$env_vars" "$(escape "$0")" > rebuild.sh
     chmod a+x ./rebuild.sh
-    eval 'exec env -i DIRECT_BUILD=1 PATH="$PATH" TERM="$TERM" TMP="$TMP" SOURCE_DATE_EPOCH=0 TZ=UTC0 LC_ALL=C '"$env_vars" sh ./rebuild.sh
+    eval 'exec env -i DIRECT_BUILD=1 PATH="$PATH" TERM="$TERM" TMP="$TMP" SOURCE_DATE_EPOCH=0 TZ=UTC0 LC_ALL=C '"$env_vars"' sh ./rebuild.sh'
 fi
 
 CC="${CC:-cc}"
