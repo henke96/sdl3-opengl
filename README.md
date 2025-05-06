@@ -3,7 +3,7 @@
 `mkdir build`  
 `cd build`  
 `PARALLEL=8 CFLAGS=-Os LDFLAGS=-s ../src/build.sh`  
-`./sdl3-opengl`  
+`./sdl3-opengl.com`  
 
 ## Cross Build
 `. ./setup_toolchain.sh`  

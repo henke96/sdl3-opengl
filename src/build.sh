@@ -37,12 +37,12 @@ fi
 CC="${CC:-cc}"
 PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
 
-OUT_NAME="${OUT_NAME:-sdl3-opengl}"
+OUT_NAME="${OUT_NAME:-sdl3-opengl.com}"
 PARALLEL="${PARALLEL:-1}"
 MAKEFILE_DEP_CFLAGS="${MAKEFILE_DEP_CFLAGS:-"-MD -MP"}"
 test "$MAKEFILE" || MAKEFILE_DEP_CFLAGS=
 
-GLESV2_CFLAGS="${GLESV2_CFLAGS-"$("$PKG_CONFIG" --cflags glesv2)"}"
+GLESV2_CFLAGS="${GLESV2_CFLAGS-"$("$PKG_CONFIG" --cflags glesv2 || :)"}"
 SDL3_CFLAGS="${SDL3_CFLAGS-"$("$PKG_CONFIG" --cflags sdl3)"}"
 SDL3_LIBS="${SDL3_LIBS-"$("$PKG_CONFIG" --libs sdl3)"}"
 
