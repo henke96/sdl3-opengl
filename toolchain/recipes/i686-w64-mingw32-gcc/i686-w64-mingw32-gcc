@@ -1,0 +1,7 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+
+arch=i686
+mingw_crt_configure_flags="--enable-lib32 --disable-lib64"
+. "$SCRIPT_DIR/../inc/w64-mingw32-gcc/w64-mingw32-gcc.sh"

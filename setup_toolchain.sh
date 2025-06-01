@@ -13,6 +13,7 @@ while test -z "$tc_toolchain"; do
     4) i686-linux-gnu-gcc
     5) x86_64-w64-mingw32-gcc
     6) aarch64-w64-mingw32-gcc
+    7) i686-w64-mingw32-gcc
 Option: '
     read tc_option
     case "$tc_option" in
@@ -40,6 +41,10 @@ Option: '
         6)
             tc_toolchain=aarch64-w64-mingw32-gcc
             tc_toolchain_cc=/bin/aarch64-w64-mingw32-gcc
+            ;;
+        7)
+            tc_toolchain=i686-w64-mingw32-gcc
+            tc_toolchain_cc=/bin/i686-w64-mingw32-gcc
             ;;
     esac
 done
