@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(sdl3-opengl C)
+project(src C)
 
 add_executable(sdl3-opengl sdl3-opengl.c gl.c)
 
