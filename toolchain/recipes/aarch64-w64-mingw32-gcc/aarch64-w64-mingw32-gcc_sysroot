@@ -1,0 +1,6 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+
+arch=aarch64
+. "$SCRIPT_DIR/../inc/w64-mingw32-gcc_sysroot/w64-mingw32-gcc_sysroot.sh"

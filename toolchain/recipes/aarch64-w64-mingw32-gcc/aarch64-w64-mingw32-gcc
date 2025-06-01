@@ -2,6 +2,6 @@
 set -ex
 SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
 
-arch=x86_64
-mingw_crt_configure_flags="--disable-lib32 --enable-lib64"
+arch=aarch64
+mingw_crt_configure_flags="--disable-lib32 --disable-lib64 --disable-libarm32 --enable-libarm64"
 . "$SCRIPT_DIR/../inc/w64-mingw32-gcc/w64-mingw32-gcc.sh"

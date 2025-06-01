@@ -1,8 +1,8 @@
-# Inputs: $SCRIPT_DIR, $arch
+# Inputs: $SCRIPT_DIR, $arch, $mingw_crt_configure_flags
 binutils_version="2.44"
 binutils_sha512="b85d3bbc0e334cf67a96219d3c7c65fbf3e832b2c98a7417bf131f3645a0307057ec81cd2b29ff2563cec53e3d42f73e2c60cc5708e80d4a730efdcc6ae14ad7"
-gcc_version="14.2.0"
-gcc_sha512="932bdef0cda94bacedf452ab17f103c0cb511ff2cec55e9112fc0328cbf1d803b42595728ea7b200e0a057c03e85626f937012e49a7515bc5dd256b2bf4bc396"
+gcc_version="15.1.0"
+gcc_sha512="ddd35ca6c653dffa88f7c7ef9ee4cd806e156e0f3b30f4d63e75a8363361285cd566ee73127734cde6a934611de815bee3e32e24bfd2e0ab9f7ff35c929821c1"
 mingw_version="12.0.0"
 mingw_sha512="949b2bfab8763ab10ec4e9fdfdaf5361517a4ab787fb98ab419b38d02694061c2e821ebbf6e2e4b39d92bdf17419d116daa8e63afd9e01d11592f39df4da69d7"
 
@@ -52,7 +52,7 @@ make -j "$NUM_CPUS" install-gcc
 cd "../mingw-w64-v$mingw_version/mingw-w64-crt"
 
 export PATH="$OUT/$SCRIPT_NAME/bin:$PATH"
-./configure --prefix="$OUT/$SCRIPT_NAME/$arch-w64-mingw32" --host="$arch-w64-mingw32" --disable-dependency-tracking --disable-lib32 --enable-lib64 \
+./configure --prefix="$OUT/$SCRIPT_NAME/$arch-w64-mingw32" --host="$arch-w64-mingw32" --disable-dependency-tracking $mingw_crt_configure_flags \
 CC= CPP= CXX=false CFLAGS="-O2 -ffile-prefix-map=$OUT=."
 
 make -j "$NUM_CPUS"

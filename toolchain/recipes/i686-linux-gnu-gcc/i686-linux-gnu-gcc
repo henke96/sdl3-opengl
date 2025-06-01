@@ -1,0 +1,7 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+
+arch=i686
+linux_arch=x86
+. "$SCRIPT_DIR/../inc/linux-gnu-gcc/linux-gnu-gcc.sh"
