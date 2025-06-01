@@ -58,6 +58,8 @@ if test "$tc_toolchain" = none; then
     printf "Clearing PKG_CONFIG_PATH\n"
     unset PKG_CONFIG_SYSROOT_DIR
     printf "Clearing PKG_CONFIG_SYSROOT_DIR\n"
+    unset CMAKE_PREFIX_PATH
+    printf "Clearing CMAKE_PREFIX_PATH\n"
 
     printf "\nEnvironment restored\n"
     return
@@ -105,5 +107,7 @@ export PKG_CONFIG_PATH="$tc_out/${tc_toolchain}_sysroot/usr/lib/pkgconfig"
 printf "Setting PKG_CONFIG_PATH=%s\n" "$PKG_CONFIG_PATH"
 export PKG_CONFIG_SYSROOT_DIR="$tc_out/${tc_toolchain}_sysroot"
 printf "Setting PKG_CONFIG_SYSROOT_DIR=%s\n" "$PKG_CONFIG_SYSROOT_DIR"
+export CMAKE_PREFIX_PATH="$tc_out/${tc_toolchain}_sysroot/usr"
+printf "Setting CMAKE_PREFIX_PATH=%s\n" "$CMAKE_PREFIX_PATH"
 
 printf "\nEnvironment setup for toolchain %s\n" "$tc_toolchain"
