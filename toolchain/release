@@ -1,0 +1,47 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+. "$SCRIPT_DIR/recipe.sh"
+
+compilers="\
+x86_64-linux-gnu-gcc/usr/bin/x86_64-x-linux-gnu-gcc \
+aarch64-linux-gnu-gcc/usr/bin/aarch64-x-linux-gnu-gcc \
+riscv64-linux-gnu-gcc/usr/bin/riscv64-x-linux-gnu-gcc \
+i686-linux-gnu-gcc/usr/bin/i686-x-linux-gnu-gcc \
+x86_64-w64-mingw32-gcc/bin/x86_64-w64-mingw32-gcc \
+aarch64-w64-mingw32-gcc/bin/aarch64-w64-mingw32-gcc \
+i686-w64-mingw32-gcc/bin/i686-w64-mingw32-gcc \
+"
+
+DEPENDENCIES="recipes/pkgconf"
+for compiler in $compilers; do
+    toolchain="${compiler%%/*}"
+    DEPENDENCIES="$DEPENDENCIES recipes/$toolchain/${toolchain}_sysroot"
+done
+DIR_DEPENDENCIES="../src"
+
+recipe_start
+
+export PKG_CONFIG="$OUT/pkgconf/bin/pkgconf"
+for compiler in $compilers; do
+    toolchain="${compiler%%/*}"
+
+    unset cflags_extra
+    ! test "$toolchain" = aarch64-w64-mingw32-gcc || cflags_extra=-Wno-attributes # TODO: gcc bug?
+
+    mkdir "$toolchain"
+    (
+        cd "$toolchain"
+
+        PARALLEL="$NUM_CPUS" \
+        DIRECT_BUILD=1 \
+        CC="$OUT/$compiler" \
+        PKG_CONFIG_PATH="$OUT/${toolchain}_sysroot/usr/lib/pkgconfig" \
+        PKG_CONFIG_SYSROOT_DIR="$OUT/${toolchain}_sysroot" \
+        CFLAGS="-Os -Werror -Wall -Wextra -Wconversion -Wno-sign-conversion $cflags_extra" \
+        LDFLAGS="-s" \
+        "$SCRIPT_DIR/../src/build.sh"
+    )
+done
+
+recipe_finish
