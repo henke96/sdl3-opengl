@@ -22,7 +22,6 @@ DIR_DEPENDENCIES="../src"
 
 recipe_start
 
-export PKG_CONFIG="$OUT/pkgconf/bin/pkgconf"
 for compiler in $compilers; do
     toolchain="${compiler%%/*}"
 
@@ -35,9 +34,10 @@ for compiler in $compilers; do
 
         PARALLEL="$NUM_CPUS" \
         DIRECT_BUILD=1 \
-        CC="$OUT/$compiler" \
+        PKG_CONFIG="$OUT/pkgconf/bin/pkgconf" \
         PKG_CONFIG_PATH="$OUT/${toolchain}_sysroot/usr/lib/pkgconfig" \
         PKG_CONFIG_SYSROOT_DIR="$OUT/${toolchain}_sysroot" \
+        CC="$OUT/$compiler" \
         CFLAGS="-Os -Werror -Wall -Wextra -Wconversion -Wno-sign-conversion $cflags_extra" \
         LDFLAGS="-s" \
         "$SCRIPT_DIR/../src/build.sh"
