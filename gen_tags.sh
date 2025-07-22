@@ -2,4 +2,4 @@
 set -e
 cd -- "${0%/*}/"
 
-"${CTAGS:-ctags}" src/*.c
+"${CTAGS:-ctags}" src/*.c src/*.h
