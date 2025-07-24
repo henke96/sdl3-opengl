@@ -54,7 +54,7 @@ recipe_finish() {
 
 recipe_download() {
     cd "$recipe_DOWNLOADS"
-    recipe_temp="${1##*/}"
+    recipe_temp="$3${1##*/}"
     if ! sha512sum -c - >&2 <<end && ! sha512 -c >&2 <<end2
 $2  $recipe_temp
 end

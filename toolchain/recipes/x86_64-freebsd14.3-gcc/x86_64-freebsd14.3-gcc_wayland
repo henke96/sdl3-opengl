@@ -1,0 +1,7 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+
+arch=x86_64
+freebsd_os="freebsd14.3"
+. "$SCRIPT_DIR/../inc/freebsd-gcc_wayland/freebsd-gcc_wayland.sh"

@@ -3,6 +3,7 @@
 
 # Note that sdl3 already depends on the khronos directory.
 DEPENDENCIES="$arch-linux-gnu-gcc_sdl3"
+DIR_DEPENDENCIES="../inc/linux-gnu-gcc_sysroot"
 
 recipe_start
 (cd "$OUT/$arch-linux-gnu-gcc_sdl3" && tar cf - usr) | tar xf -

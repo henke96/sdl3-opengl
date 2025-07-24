@@ -1,0 +1,9 @@
+#!/bin/sh --
+set -ex
+SCRIPT_DIR="$(cd -- "${0%/*}/" && pwd)"
+
+arch=x86_64
+freebsd_arch="amd64"
+freebsd_version="14.3"
+freebsd_sha512="a9c19e4936294c300793b6bb9ca5d934400d8438e9b260445ad669a15ec4674b10a4e4cd7a7fe5fdf93047cdfcf78313b9f9d6b18bd1650e3afce46d479204da"
+. "$SCRIPT_DIR/../inc/freebsd-gcc/freebsd-gcc.sh"

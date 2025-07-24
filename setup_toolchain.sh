@@ -11,9 +11,10 @@ while test -z "$tc_toolchain"; do
     2) aarch64-linux-gnu-gcc
     3) riscv64-linux-gnu-gcc
     4) i686-linux-gnu-gcc
-    5) x86_64-w64-mingw32-gcc
-    6) aarch64-w64-mingw32-gcc
-    7) i686-w64-mingw32-gcc
+    5) x86_64-freebsd14.3-gcc
+    6) x86_64-w64-mingw32-gcc
+    7) aarch64-w64-mingw32-gcc
+    8) i686-w64-mingw32-gcc
 Option: '
     read tc_option
     case "$tc_option" in
@@ -35,14 +36,18 @@ Option: '
             tc_toolchain_cc=/usr/bin/i686-x-linux-gnu-gcc
             ;;
         5)
+            tc_toolchain=x86_64-freebsd14.3-gcc
+            tc_toolchain_cc=/usr/bin/x86_64-x-freebsd14.3-gcc
+            ;;
+        6)
             tc_toolchain=x86_64-w64-mingw32-gcc
             tc_toolchain_cc=/bin/x86_64-w64-mingw32-gcc
             ;;
-        6)
+        7)
             tc_toolchain=aarch64-w64-mingw32-gcc
             tc_toolchain_cc=/bin/aarch64-w64-mingw32-gcc
             ;;
-        7)
+        8)
             tc_toolchain=i686-w64-mingw32-gcc
             tc_toolchain_cc=/bin/i686-w64-mingw32-gcc
             ;;
@@ -103,7 +108,7 @@ export CC="$tc_out/$tc_toolchain$tc_toolchain_cc"
 printf "\nSetting CC=%s\n" "$CC"
 export PKG_CONFIG="$tc_out/pkgconf/bin/pkgconf"
 printf "Setting PKG_CONFIG=%s\n" "$PKG_CONFIG"
-export PKG_CONFIG_PATH="$tc_out/${tc_toolchain}_sysroot/usr/lib/pkgconfig"
+export PKG_CONFIG_PATH="$tc_out/${tc_toolchain}_sysroot/usr/lib/pkgconfig:$tc_out/${tc_toolchain}_sysroot/usr/libdata/pkgconfig"
 printf "Setting PKG_CONFIG_PATH=%s\n" "$PKG_CONFIG_PATH"
 export PKG_CONFIG_SYSROOT_DIR="$tc_out/${tc_toolchain}_sysroot"
 printf "Setting PKG_CONFIG_SYSROOT_DIR=%s\n" "$PKG_CONFIG_SYSROOT_DIR"
