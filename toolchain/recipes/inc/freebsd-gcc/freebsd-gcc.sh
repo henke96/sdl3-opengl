@@ -10,8 +10,7 @@ DIR_DEPENDENCIES="../inc/freebsd-gcc"
 
 recipe_start
 export PATH="$OUT/make/bin:$OUT/xz/bin:$OUT/python/bin:$OUT/gzip/bin:$OUT/bison/bin:$OUT/gawk/bin:$OUT/sed/bin:$OUT/grep/bin:$PATH"
-
-xz -d -c "$(recipe_download "https://download.freebsd.org/releases/$freebsd_arch/$freebsd_version-RELEASE/base.txz" "$freebsd_sha512" "$arch-freebsd$freebsd_version-")" | tar xf - ./usr/include ./usr/lib ./lib
+xz -d -c "$(recipe_download "http://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/$freebsd_arch/$freebsd_version-RELEASE/base.txz" "$freebsd_sha512" "$arch-freebsd$freebsd_version-")" | tar xf - ./usr/include ./usr/lib ./lib
 rm -rf ./usr/lib/gcc ./usr/lib/clang
 
 xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/binutils/binutils-$binutils_version.tar.xz" "$binutils_sha512")" | tar xf -
