@@ -23,7 +23,8 @@ if test -z "$DIRECT_BUILD"; then
 MAKEFILE MAKEFILE_DEP_CFLAGS PARALLEL OUT_NAME \
 CC PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_SYSROOT_DIR \
 CFLAGS LDFLAGS LDLIBS \
-GLESV2_CFLAGS SDL3_CFLAGS \
+PLATFORM \
+SDL3_CFLAGS \
 SDL3_LIBS
     do
         eval 'env_vars="$env_vars${'"$env_var"'+"'"$env_var"'=$(escape "$'"$env_var"'") "}"'
@@ -37,23 +38,32 @@ fi
 CC="${CC:-cc}"
 PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
 
-OUT_NAME="${OUT_NAME:-sdl3-opengl.com}"
+OUT_NAME="${OUT_NAME:-client.com}"
 PARALLEL="${PARALLEL:-1}"
 MAKEFILE_DEP_CFLAGS="${MAKEFILE_DEP_CFLAGS:-"-MD -MP"}"
 test "$MAKEFILE" || MAKEFILE_DEP_CFLAGS=
 
-GLESV2_CFLAGS="${GLESV2_CFLAGS-"$("$PKG_CONFIG" --cflags glesv2 || :)"}"
-SDL3_CFLAGS="${SDL3_CFLAGS-"$("$PKG_CONFIG" --cflags sdl3)"}"
-SDL3_LIBS="${SDL3_LIBS-"$("$PKG_CONFIG" --libs sdl3)"}"
+PLATFORM="${PLATFORM:-sdl3}"
+
+if test "$PLATFORM" = "sdl3"; then
+    SDL3_CFLAGS="${SDL3_CFLAGS-"$("$PKG_CONFIG" --cflags sdl3)"}"
+    SDL3_LIBS="${SDL3_LIBS-"$("$PKG_CONFIG" --libs sdl3)"}"
+    platform_cflags="-I $(escape "${SCRIPT_DIR}platform/sdl3") $SDL3_CFLAGS"
+    platform_libs="$SDL3_LIBS"
+    platform_sources="platform/sdl3/platform"
+else
+    echo "Invalid PLATFORM $PLATFORM"
+    exit 1
+fi
 
 compile() {
-    cmd="$CC -c $MAKEFILE_DEP_CFLAGS $GLESV2_CFLAGS $SDL3_CFLAGS $CFLAGS $(escape "$SCRIPT_DIR$1.c")"
+    cmd="$CC -c $MAKEFILE_DEP_CFLAGS $platform_cflags $CFLAGS $(escape "$SCRIPT_DIR$1.c")"
     printf "%s\n" "$cmd"
     eval "$cmd"
     if test "$MAKEFILE"; then
-        dep_cmd="mv $source.d $source.o.d"
+        dep_cmd="mv ${1##*/}.d ${1##*/}.o.d"
         eval "$dep_cmd"
-        printf "%s.o:\n\t%s\n\t@%s\ninclude %s.o.d\n" "$1" "$cmd" "$dep_cmd" "$1" >> Makefile.temp
+        printf "%s.o:\n\t%s\n\t@%s\ninclude %s.o.d\n" "${1##*/}" "$cmd" "$dep_cmd" "${1##*/}" >> Makefile.temp
     fi
 }
 
@@ -71,11 +81,22 @@ pids=
 objects=
 running=0
 for source in \
-sdl3-opengl gl
+$platform_sources \
+client \
+util \
+pix2d \
+pix3d \
+world \
+world3d \
+bzip2 \
+packet \
+file_stream \
+jagfile \
+pix_font
 do
     compile "$source" &
     pids="$pids $!"
-    objects="$objects $source.o"
+    objects="$objects ${source##*/}.o"
     running=$(($running+1))
     test "$running" -lt "$PARALLEL" || wait_compile
 done
@@ -84,7 +105,7 @@ do
     wait "$pid"
 done
 
-cmd="$CC -o $OUT_NAME $LDFLAGS$objects $SDL3_LIBS $LDLIBS"
+cmd="$CC -o $OUT_NAME $LDFLAGS$objects $platform_libs $LDLIBS"
 printf "%s\n" "$cmd"
 eval "$cmd"
 if test "$MAKEFILE"; then
