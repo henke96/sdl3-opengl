@@ -10,6 +10,7 @@
 #include "jagfile.h"
 #include "file_stream.h"
 #include "pix_font.h"
+#include "pix32.h"
 
 struct client_gameshell {
     struct pix_map draw_area;
@@ -128,19 +129,6 @@ static void client_draw_progress(int32_t percent, char *message) {
     // TODO
 }
 
-// java: java.util.zip.CRC32
-static int32_t client_crc32(uint8_t *data, ptrdiff_t data_length) {
-    uint32_t crc = 0xFFFFFFFF;
-    for (ptrdiff_t i = 0; i < data_length; ++i) {
-        crc = crc ^ (uint32_t)data[i];
-        for (int j = 0; j < 8; ++j) {
-            uint32_t mask = -(crc & 1);
-            crc = (crc >> 1) ^ (0xEDB88320 & mask);
-        }
-    }
-    return (int32_t)~crc;
-}
-
 static void client_get_jag_file(int32_t crc, char *name, int32_t file, char *display_name, struct jagfile *out_file) {
     uint8_t *data = NULL;
     int32_t retry = 5;
@@ -150,7 +138,7 @@ static void client_get_jag_file(int32_t crc, char *name, int32_t file, char *dis
     data = file_stream_read(&client.file_streams[0], file, &data_length);
 
     if (data != NULL) {
-        int32_t checksum = client_crc32(data, data_length);
+        int32_t checksum = util_crc32(data, data_length);
         if (crc != checksum) data = NULL;
     }
 
@@ -161,6 +149,99 @@ static void client_get_jag_file(int32_t crc, char *name, int32_t file, char *dis
 
     // TODO: Download loop..
     for (;;);
+}
+
+static void client_load_title_background(void) {
+    ptrdiff_t src_length;
+    uint8_t *src = jagfile_read(&client.jag_title, x_STR_COMMA_LEN("title.dat"), &src_length);
+
+    struct pix32 background;
+    pix32_init_jpeg(&background, src, src_length);
+
+    pix_map_bind(&client.image_title0);
+    pix32_blit_opaque(&background, 0, 0);
+
+    pix_map_bind(&client.image_title1);
+    pix32_blit_opaque(&background, -637, 0);
+
+    pix_map_bind(&client.image_title2);
+    pix32_blit_opaque(&background, -128, 0);
+
+    pix_map_bind(&client.image_title3);
+    pix32_blit_opaque(&background, -202, -371);
+
+    pix_map_bind(&client.image_title4);
+    pix32_blit_opaque(&background, -202, -171);
+
+    pix_map_bind(&client.image_title5);
+    pix32_blit_opaque(&background, 0, -265);
+
+    pix_map_bind(&client.image_title6);
+    pix32_blit_opaque(&background, -562, -265);
+
+    pix_map_bind(&client.image_title7);
+    pix32_blit_opaque(&background, -128, -171);
+
+    pix_map_bind(&client.image_title8);
+    pix32_blit_opaque(&background, -562, -171);
+
+    // draw right side (mirror image)
+    int32_t *pixels = platform_heap_alloc(background.crop_right * 4, 4);
+    for (int32_t y = 0; y < background.crop_bottom; ++y) {
+        for (int32_t x = 0; x < background.crop_right; ++x) {
+            pixels[x] = background.pixels[background.crop_right * y + background.crop_right - x - 1];
+        }
+
+        for (int32_t x = 0; x < background.crop_right; ++x) {
+            background.pixels[background.crop_right * y + x] = pixels[x];
+        }
+    }
+
+    pix_map_bind(&client.image_title0);
+    pix32_blit_opaque(&background, 382, 0);
+
+    pix_map_bind(&client.image_title1);
+    pix32_blit_opaque(&background, -255, 0);
+
+    pix_map_bind(&client.image_title2);
+    pix32_blit_opaque(&background, 254, 0);
+
+    pix_map_bind(&client.image_title3);
+    pix32_blit_opaque(&background, 180, -371);
+
+    pix_map_bind(&client.image_title4);
+    pix32_blit_opaque(&background, 180, -171);
+
+    pix_map_bind(&client.image_title5);
+    pix32_blit_opaque(&background, 382, -265);
+
+    pix_map_bind(&client.image_title6);
+    pix32_blit_opaque(&background, -180, -265);
+
+    pix_map_bind(&client.image_title7);
+    pix32_blit_opaque(&background, 254, -171);
+
+    pix_map_bind(&client.image_title8);
+    pix32_blit_opaque(&background, -180, -171);
+
+    struct pix32 logo;
+    // NOTE: Adding ".dat" suffix here instead of inside of `pix32_init_jagfile`.
+    pix32_init_jagfile(&logo, &client.jag_title, x_STR_COMMA_LEN("logo.dat"), 0);
+    pix_map_bind(&client.image_title2);
+    pix32_draw(&logo, 382 - logo.crop_right / 2 - 128, 18);
+
+    platform_heap_reset(src);
+
+    // TODO: remove
+    pix_map_draw(&client.image_title0, 0, 0);
+    pix_map_draw(&client.image_title1, 637, 0);
+    pix_map_draw(&client.image_title2, 128, 0);
+    pix_map_draw(&client.image_title3, 202, 371);
+    pix_map_draw(&client.image_title4, 202, 171);
+    pix_map_draw(&client.image_title5, 0, 265);
+    pix_map_draw(&client.image_title6, 562, 265);
+    pix_map_draw(&client.image_title7, 128, 171);
+    pix_map_draw(&client.image_title8, 562, 171);
 }
 
 // java: load() up until TODO
@@ -195,7 +276,7 @@ static void client_load1(void) {
     pix_font_init(&client.font_plain_12, &client.jag_title, x_STR_COMMA_LEN("p12.dat"));
     pix_font_init(&client.font_bold_12, &client.jag_title, x_STR_COMMA_LEN("b12.dat"));
     pix_font_init(&client.font_quill_8, &client.jag_title, x_STR_COMMA_LEN("q8.dat"));
-
+    
     client_load_title_background();
     // TODO
 }

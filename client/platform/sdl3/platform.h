@@ -2,15 +2,23 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+#include <limits.h>
 
 #define platform_MEMSET memset
 #define platform_MEMMOVE memmove
 #define platform_MEMCPY memcpy
+#define platform_abort abort
 
 int platform_frame_init(int32_t width, int32_t height);
 void platform_print(char *text, ptrdiff_t text_len);
 void platform_heap_reset(void *address);
 void *platform_heap_alloc(size_t size, size_t align);
+
+struct SDL_Surface;
+typedef struct SDL_Surface *platform_image;
+platform_image platform_create_image(int32_t *data, int32_t width, int32_t height);
+void platform_draw_image(platform_image image, int32_t x, int32_t y, int32_t width, int32_t height);
 
 typedef int platform_random_access_file;
 #define platform_CACHE_DAT 5

@@ -16,11 +16,13 @@ void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *n
     struct packet var4;
     ptrdiff_t var4_data_length;
     uint8_t *var4_data = jagfile_read(jagfile, name, name_length, &var4_data_length);
+    if (var4_data == NULL) platform_abort();
     packet_init(&var4, var4_data, var4_data_length);
 
     struct packet var5;
     ptrdiff_t var5_data_length;
     uint8_t *var5_data = jagfile_read(jagfile, x_STR_COMMA_LEN("index.dat"), &var5_data_length);
+    if (var5_data == NULL) platform_abort();
     packet_init(&var5, var5_data, var5_data_length);
 
     var5.pos = packet_g2(&var4) + 4;
@@ -75,7 +77,13 @@ void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *n
     for (int i = 0; i < 256; ++i) {
         self->draw_width[i] = self->char_advance[pix_font_char_lookup[i]];
     }
-    // TODO: alloc
+
+    // NOTE: Added to not leak `var4_data` and `var5_data`.
+    ptrdiff_t len = (int8_t *)platform_heap_alloc(0, 1) - self->char_mask[0];
+    platform_MEMMOVE(&var4_data[0], self->char_mask[0], len);
+    ptrdiff_t diff = (int8_t *)&var4_data[0] - self->char_mask[0];
+    for (int i = 0; i < 94; ++i) self->char_mask[i] += diff;
+    platform_heap_reset(&var4_data[len]);
 }
 
 void pix_font_static_init(void) {

@@ -21,4 +21,5 @@ char *util_int_to_str(char *buffer_end, int64_t number);
 // The result is stored in `*number` if successful.
 ptrdiff_t util_str_to_int(const void *buffer, ptrdiff_t max_chars, int64_t *number);
 
-
+// java: java.util.zip.CRC32
+int32_t util_crc32(uint8_t *data, ptrdiff_t data_length);

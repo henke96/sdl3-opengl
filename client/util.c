@@ -49,3 +49,15 @@ ptrdiff_t util_str_to_int(const void *buffer, ptrdiff_t max_chars, int64_t *numb
     }
     return 0;
 }
+
+int32_t util_crc32(uint8_t *data, ptrdiff_t data_length) {
+    uint32_t crc = 0xFFFFFFFF;
+    for (ptrdiff_t i = 0; i < data_length; ++i) {
+        crc = crc ^ (uint32_t)data[i];
+        for (int j = 0; j < 8; ++j) {
+            uint32_t mask = -(crc & 1);
+            crc = (crc >> 1) ^ (0xEDB88320 & mask);
+        }
+    }
+    return (int32_t)~crc;
+}

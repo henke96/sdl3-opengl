@@ -92,7 +92,10 @@ bzip2 \
 packet \
 file_stream \
 jagfile \
-pix_font
+pix_font \
+jpeg \
+pix32 \
+pix_map
 do
     compile "$source" &
     pids="$pids $!"
