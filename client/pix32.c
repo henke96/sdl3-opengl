@@ -7,28 +7,28 @@
 #include "x.h"
 
 // NOTE: Caller must add ".dat" suffix.
-void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char *name, ptrdiff_t name_length, int32_t arg2) {
+void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char *name, int32_t name_length, int32_t arg2) {
     // NOTE: Once we have the pixel data it will be moved here.
     int32_t *pixels_moved = platform_heap_alloc(0, 4);
 
     // TODO: Rename variables.
     struct packet var4;
-    ptrdiff_t var4_data_length;
+    int32_t var4_data_length;
     uint8_t *var4_data = jagfile_read(jagfile, name, name_length, &var4_data_length);
-    if (var4_data == NULL) platform_abort();
+    if (var4_data == NULL) platform_ABORT();
     packet_init(&var4, var4_data, var4_data_length);
 
     struct packet var5;
-    ptrdiff_t var5_data_length;
+    int32_t var5_data_length;
     uint8_t *var5_data = jagfile_read(jagfile, x_STR_COMMA_LEN("index.dat"), &var5_data_length);
-    if (var5_data == NULL) platform_abort();
+    if (var5_data == NULL) platform_ABORT();
     packet_init(&var5, var5_data, var5_data_length);
 
     var5.pos = packet_g2(&var4);
     self->width = packet_g2(&var5);
     self->height = packet_g2(&var5);
     int32_t var6 = packet_g1(&var5);
-    int32_t *var7 = platform_heap_alloc(var6 * 4, 4);
+    int32_t *var7 = platform_heap_alloc(var6, 4);
     var7[0] = 0; // NOTE: Implicit in java.
     for (int32_t i = 0; i < var6 - 1; ++i) {
         var7[i + 1] = packet_g3(&var5);
@@ -46,10 +46,11 @@ void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char 
     self->crop_right = packet_g2(&var5);
     self->crop_bottom = packet_g2(&var5);
     int32_t var10 = packet_g1(&var5);
-    ptrdiff_t len = (ptrdiff_t)self->crop_bottom * self->crop_right;
-    self->pixels = platform_heap_alloc(len * 4, 4);
+    int32_t len;
+    if (platform_CKD_MUL32(&len, self->crop_bottom, self->crop_right)) platform_ABORT();
+    self->pixels = platform_heap_alloc(len, 4);
     if (var10 == 0) {
-        for (ptrdiff_t i = 0; i < len; ++i) {
+        for (int32_t i = 0; i < len; ++i) {
             self->pixels[i] = var7[packet_g1(&var4)];
         }
     } else if (var10 == 1) {
@@ -66,7 +67,7 @@ void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char 
     platform_heap_reset(&self->pixels[len]);
 }
 
-void pix32_init_jpeg(struct pix32 *self, uint8_t *src, ptrdiff_t src_length) {
+void pix32_init_jpeg(struct pix32 *self, uint8_t *src, int32_t src_length) {
     struct jpeg jpeg;
     self->pixels = jpeg_decode(&jpeg, &src[0], src_length, &self->crop_right, &self->crop_bottom);
     self->width = self->crop_right;
@@ -133,46 +134,35 @@ void pix32_blit_opaque(struct pix32 *self, int32_t arg0, int32_t arg1) {
     }
 }
 
-static void pix32_copy_pixels2(int32_t *arg0, int32_t *arg1, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) {
+static void pix32_copy_pixels2(int32_t *dest, int32_t *src, int32_t src_off, int32_t dest_off, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) {
     int32_t var10 = -(arg5 >> 2);
     int32_t var11 = -(arg5 & 0x3);
     for (int32_t i = -arg6; i < 0; ++i) {
+        // NOTE: Rewritten slightly.
         for (int32_t j = var10; j < 0; ++j) {
-            int var16 = arg1[arg3++];
-            if (var16 == 0) {
-                arg4++;
-            } else {
-                arg0[arg4++] = var16;
-            }
-            int var17 = arg1[arg3++];
-            if (var17 == 0) {
-                arg4++;
-            } else {
-                arg0[arg4++] = var17;
-            }
-            int var18 = arg1[arg3++];
-            if (var18 == 0) {
-                arg4++;
-            } else {
-                arg0[arg4++] = var18;
-            }
-            int var19 = arg1[arg3++];
-            if (var19 == 0) {
-                arg4++;
-            } else {
-                arg0[arg4++] = var19;
-            }
+            int32_t temp0 = src[src_off];
+            if (temp0 != 0) dest[dest_off] = temp0;
+
+            int32_t temp1 = src[src_off + 1];
+            if (temp1 != 0) dest[dest_off + 1] = temp1;
+
+            int32_t temp2 = src[src_off + 2];
+            if (temp2 != 0) dest[dest_off + 2] = temp2;
+
+            int32_t temp3 = src[src_off + 3];
+            if (temp3 != 0) dest[dest_off + 3] = temp3;
+
+            src_off += 4;
+            dest_off += 4;
         }
-        for (int var14 = var11; var14 < 0; var14++) {
-            int var15 = arg1[arg3++];
-            if (var15 == 0) {
-                arg4++;
-            } else {
-                arg0[arg4++] = var15;
-            }
+        for (int j = var11; j < 0; ++j) {
+            int32_t temp = src[src_off++];
+            if (temp != 0) dest[dest_off] = temp;
+            ++dest_off;
         }
-        arg4 += arg7;
-        arg3 += arg8;
+
+        dest_off += arg7;
+        src_off += arg8;
     }
 }
 

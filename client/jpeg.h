@@ -55,7 +55,7 @@ struct jpeg {
 int32_t *jpeg_decode(
    struct jpeg *jpeg,
    uint8_t *buffer,
-   ptrdiff_t buffer_length,
+   int32_t buffer_length,
    int32_t *out_width,
    int32_t *out_height
 );

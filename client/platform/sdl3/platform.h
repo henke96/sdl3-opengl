@@ -8,12 +8,14 @@
 #define platform_MEMSET memset
 #define platform_MEMMOVE memmove
 #define platform_MEMCPY memcpy
-#define platform_abort abort
+#define platform_ABORT abort
+#define platform_CKD_ADD32(RES, A, B) __builtin_add_overflow(A, B, RES) // TODO
+#define platform_CKD_MUL32(RES, A, B) __builtin_mul_overflow(A, B, RES) // TODO
 
 int platform_frame_init(int32_t width, int32_t height);
-void platform_print(char *text, ptrdiff_t text_len);
+void platform_print(char *text, size_t text_len);
 void platform_heap_reset(void *address);
-void *platform_heap_alloc(size_t size, size_t align);
+void *platform_heap_alloc(int32_t len, int32_t elem_size_and_align);
 
 struct SDL_Surface;
 typedef struct SDL_Surface *platform_image;

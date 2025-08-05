@@ -134,7 +134,7 @@ static void client_get_jag_file(int32_t crc, char *name, int32_t file, char *dis
     int32_t retry = 5;
 
     // TODO: if (this.fileStreams[0] != null) {
-    ptrdiff_t data_length;
+    int32_t data_length;
     data = file_stream_read(&client.file_streams[0], file, &data_length);
 
     if (data != NULL) {
@@ -152,7 +152,7 @@ static void client_get_jag_file(int32_t crc, char *name, int32_t file, char *dis
 }
 
 static void client_load_title_background(void) {
-    ptrdiff_t src_length;
+    int32_t src_length;
     uint8_t *src = jagfile_read(&client.jag_title, x_STR_COMMA_LEN("title.dat"), &src_length);
 
     struct pix32 background;
@@ -186,7 +186,7 @@ static void client_load_title_background(void) {
     pix32_blit_opaque(&background, -562, -171);
 
     // draw right side (mirror image)
-    int32_t *pixels = platform_heap_alloc(background.crop_right * 4, 4);
+    int32_t *pixels = platform_heap_alloc(background.crop_right, 4);
     for (int32_t y = 0; y < background.crop_bottom; ++y) {
         for (int32_t x = 0; x < background.crop_right; ++x) {
             pixels[x] = background.pixels[background.crop_right * y + background.crop_right - x - 1];
@@ -311,7 +311,7 @@ int client_main(int argc, char **argv) {
 
     if (argc == 6) {
         char *parse;
-        ptrdiff_t parse_len;
+        int32_t parse_len;
         int64_t parsed;
         
         parse = argv[1];

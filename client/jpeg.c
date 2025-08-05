@@ -812,21 +812,21 @@ struct jpeg_resample {
    int ypos;    // which pre-expansion row we're on
 };
 
-int32_t *jpeg_decode(struct jpeg *self, uint8_t *buffer, ptrdiff_t buffer_length, int32_t *out_width, int32_t *out_height) {
+int32_t *jpeg_decode(struct jpeg *self, uint8_t *buffer, int32_t buffer_length, int32_t *out_width, int32_t *out_height) {
    self->img_buffer = buffer;
    self->img_buffer_end = &buffer[buffer_length];
 
-   if (!stbi__decode_jpeg_header(self)) platform_abort();
+   if (!stbi__decode_jpeg_header(self)) platform_ABORT();
 
    *out_width = self->img_x;
    *out_height = self->img_y;
 
-   if (!stbi__mul3sizes_valid(self->img_x, self->img_y, 4)) platform_abort();
-   int32_t *output = platform_heap_alloc(self->img_x * self->img_y * 4, 4);
+   if (!stbi__mul3sizes_valid(self->img_x, self->img_y, 4)) platform_ABORT();
+   int32_t *output = platform_heap_alloc(self->img_x * self->img_y, 4);
 
    struct jpeg_resample res_comp[4];
    for (int k=0; k < jpeg_IMG_N_COMP; ++k) {
-      if (!stbi__mul2sizes_valid(self->img_comp[k].w2, self->img_comp[k].h2)) platform_abort();
+      if (!stbi__mul2sizes_valid(self->img_comp[k].w2, self->img_comp[k].h2)) platform_ABORT();
       self->img_comp[k].data = platform_heap_alloc(self->img_comp[k].w2 * self->img_comp[k].h2, 1);
 
       struct jpeg_resample *r = &res_comp[k];
@@ -850,7 +850,7 @@ int32_t *jpeg_decode(struct jpeg *self, uint8_t *buffer, ptrdiff_t buffer_length
    }
 
    // load a jpeg image from whichever source, but leave in YCbCr format
-   if (!stbi__decode_jpeg_image(self)) platform_abort();
+   if (!stbi__decode_jpeg_image(self)) platform_ABORT();
 
    // resample and color-convert
    unsigned int j;

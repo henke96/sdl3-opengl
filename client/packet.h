@@ -1,11 +1,11 @@
 struct packet { // TODO: rename? TODO: extends DoublyLinkable
     uint8_t *data;
-    ptrdiff_t data_length;
+    int32_t data_length;
     int32_t pos;
     // TODO: bit_pos
 };
 
-static inline void packet_init(struct packet *self, uint8_t *src, ptrdiff_t src_length) {
+static inline void packet_init(struct packet *self, uint8_t *src, int32_t src_length) {
     self->data = src;
     self->data_length = src_length;
     self->pos = 0;

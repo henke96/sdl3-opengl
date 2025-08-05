@@ -9,8 +9,6 @@
 #define util_INT64_MAX_CHARS 20
 #define util_UINT64_MAX_CHARS 20
 
-ptrdiff_t util_cstr_len(const char *str);
-
 int util_cstr_cmp(const char *left, const char *right);
 
 // `buffer_end` points 1 past where last digit is written.
@@ -19,7 +17,7 @@ char *util_int_to_str(char *buffer_end, int64_t number);
 
 // Returns number of characters in the parsed number (max `max_chars`), 0 if parsing failed, or -1 on overflow.
 // The result is stored in `*number` if successful.
-ptrdiff_t util_str_to_int(const void *buffer, ptrdiff_t max_chars, int64_t *number);
+int32_t util_str_to_int(const void *buffer, int32_t max_chars, int64_t *number);
 
 // java: java.util.zip.CRC32
-int32_t util_crc32(uint8_t *data, ptrdiff_t data_length);
+int32_t util_crc32(uint8_t *data, int32_t data_length);

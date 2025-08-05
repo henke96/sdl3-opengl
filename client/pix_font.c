@@ -7,22 +7,22 @@
 static int pix_font_char_lookup[256];
 
 // NOTE: Caller must add ".dat" suffix.
-void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *name, ptrdiff_t name_length) {
+void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *name, int32_t name_length) {
     // NOTE: Set fields to default values.
     self->strikethrough = false;
     self->height = 0;
 
     // TODO: Rename variables.
     struct packet var4;
-    ptrdiff_t var4_data_length;
+    int32_t var4_data_length;
     uint8_t *var4_data = jagfile_read(jagfile, name, name_length, &var4_data_length);
-    if (var4_data == NULL) platform_abort();
+    if (var4_data == NULL) platform_ABORT();
     packet_init(&var4, var4_data, var4_data_length);
 
     struct packet var5;
-    ptrdiff_t var5_data_length;
+    int32_t var5_data_length;
     uint8_t *var5_data = jagfile_read(jagfile, x_STR_COMMA_LEN("index.dat"), &var5_data_length);
-    if (var5_data == NULL) platform_abort();
+    if (var5_data == NULL) platform_ABORT();
     packet_init(&var5, var5_data, var5_data_length);
 
     var5.pos = packet_g2(&var4) + 4;
@@ -36,16 +36,17 @@ void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *n
         int32_t var11 = self->char_mask_width[i] = packet_g2(&var5);
         int32_t var12 = self->char_mask_height[i] = packet_g2(&var5);
         int32_t var13 = packet_g1(&var5);
-        int32_t var14 = var11 * var12;
+        int32_t var14;
+        if (platform_CKD_MUL32(&var14, var11, var12)) platform_ABORT();
         self->char_mask[i] = platform_heap_alloc(var14, 1);
         if (var13 == 0) {
             for (int32_t j = 0; j < var14; ++j) {
                 self->char_mask[i][j] = packet_g1b(&var4);
             }
         } else if (var13 == 1) {
-            for (int32_t w = 0; w < var11; ++w) {
-                for (int32_t h = 0; h < var12; ++h) {
-                    self->char_mask[i][var11 * h + w] = packet_g1b(&var4);
+            for (int32_t x = 0; x < var11; ++x) {
+                for (int32_t y = 0; y < var12; ++y) {
+                    self->char_mask[i][var11 * y + x] = packet_g1b(&var4);
                 }
             }
         }
@@ -57,8 +58,8 @@ void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *n
         self->char_advance[i] = var11 + 2;
 
         int32_t var18 = 0;
-        for (int32_t h = var12 / 7; h < var12; ++h) {
-            var18 += self->char_mask[i][var11 * h];
+        for (int32_t var19 = var12 / 7; var19 < var12; ++var19) {
+            var18 += self->char_mask[i][var11 * var19];
         }
         // NOTE: Removed useless var10002.
         if (var18 <= var12 / 7) {
@@ -66,8 +67,8 @@ void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *n
             self->char_offset_x[i] = 0;
         }
         int32_t var20 = 0;
-        for (int32_t h = var12 / 7; h < var12; ++h) {
-            var20 += self->char_mask[i][var11 * h + (var11 - 1)];
+        for (int32_t var21 = var12 / 7; var21 < var12; ++var21) {
+            var20 += self->char_mask[i][var11 * var21 + (var11 - 1)];
         }
         if (var20 <= var12 / 7) {
             --self->char_advance[i];

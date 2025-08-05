@@ -6,7 +6,6 @@
 #include <SDL3/SDL_main.h>
 
 #include <limits.h>
-#include <stdalign.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -15,8 +14,7 @@ static SDL_Surface *window_surface = NULL;
 static SDL_AudioStream *audio_stream = NULL;
 static int sine_sample = 0;
 
-#define platform_HEAP_SIZE ((ptrdiff_t)1 << 26)
-static alignas(max_align_t) uint8_t platform_heap[platform_HEAP_SIZE];
+static uint8_t platform_heap[1 << 26];
 static uint8_t *platform_heap_pos;
 
 static const char *platform_cache_file_names[6] = {
@@ -75,7 +73,7 @@ int platform_frame_init(int32_t width, int32_t height) {
     return 0;
 }
 
-void platform_print(char *text, ptrdiff_t text_len) {
+void platform_print(char *text, size_t text_len) {
     if (text_len > INT_MAX) text_len = INT_MAX;
     SDL_Log("%.*s", (int)text_len, text);
 }
@@ -84,14 +82,16 @@ void platform_heap_reset(void *address) {
     platform_heap_pos = address;
 }
 
-void *platform_heap_alloc(size_t size, size_t align) {
-    // Align to `align`.
+void *platform_heap_alloc(int32_t len, int32_t elem_size_and_align) {
     ptrdiff_t offset = platform_heap_pos - &platform_heap[0];
-    platform_heap_pos += -offset & (align - 1); 
+    platform_heap_pos += -offset & (elem_size_and_align - 1); 
+
+    int32_t size;
+    if (len < 0 || platform_CKD_MUL32(&size, len, elem_size_and_align)) platform_ABORT();
 
     void *ret = platform_heap_pos;
-    size_t remaining = x_ARRAY_END(platform_heap) - platform_heap_pos;
-    if (remaining < size) platform_abort();
+    ptrdiff_t remaining = x_ARRAY_END(platform_heap) - platform_heap_pos;
+    if (remaining < size) platform_ABORT();
     platform_heap_pos += size;
     return ret;
 }
@@ -103,7 +103,7 @@ int platform_random_access_file_seek(platform_random_access_file file, int32_t p
 
 int32_t platform_random_access_file_length(platform_random_access_file file) {
     Sint64 size = SDL_GetIOSize(platform_cache_files[file]);
-    if (size < 0 || size > INT32_MAX) platform_abort();
+    if (size < 0 || size > INT32_MAX) platform_ABORT();
     return (int32_t)size;
 }
 
@@ -120,7 +120,7 @@ SDL_Surface *platform_create_image(int32_t *data, int32_t width, int32_t height)
     SDL_Surface *surface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_XRGB8888, data, width * sizeof(data[0]));;
     if (!surface) {
         SDL_Log("SDL_CreateSurfaceFrom failed: %s", SDL_GetError());
-        platform_abort();
+        platform_ABORT();
     }
     return surface;
 }
@@ -131,11 +131,11 @@ void platform_draw_image(platform_image image, int32_t x, int32_t y, int32_t wid
     SDL_Rect dest = { .x = x, .y = y }; // width and height are ignored.
     if (!SDL_BlitSurface(image, NULL, window_surface, &dest)) {
         SDL_Log("SDL_BlitSurface failed: %s", SDL_GetError());
-        platform_abort();
+        platform_ABORT();
     }
     if (!SDL_UpdateWindowSurface(window)) { // TODO: move
         SDL_Log("SDL_UpdateWindowSurface failed: %s", SDL_GetError());
-        platform_abort();
+        platform_ABORT();
     }
 }
 

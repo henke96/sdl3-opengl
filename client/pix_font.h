@@ -12,4 +12,4 @@ struct pix_font {
 };
 
 void pix_font_static_init(void);
-void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *name, ptrdiff_t name_length);
+void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *name, int32_t name_length);

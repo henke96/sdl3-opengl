@@ -13,4 +13,4 @@ void file_stream_init(
     int32_t max_file_size
 );
 
-uint8_t *file_stream_read(struct file_stream *self, int32_t file, ptrdiff_t *out_length);
+uint8_t *file_stream_read(struct file_stream *self, int32_t file, int32_t *out_length);

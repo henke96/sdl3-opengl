@@ -30,7 +30,7 @@ static int file_stream_seek(int32_t pos, platform_random_access_file file) {
     return platform_random_access_file_seek(file, pos);
 }
 
-uint8_t *file_stream_read(struct file_stream *self, int32_t file, ptrdiff_t *out_length) {
+uint8_t *file_stream_read(struct file_stream *self, int32_t file, int32_t *out_length) {
     if (file_stream_seek(file * 6, self->idx) != 0) return NULL;
 
     int32_t n;
@@ -46,7 +46,7 @@ uint8_t *file_stream_read(struct file_stream *self, int32_t file, ptrdiff_t *out
 
     if (
         sector <= 0 ||
-        (ptrdiff_t)sector > platform_random_access_file_length(self->dat) / 520
+        sector > platform_random_access_file_length(self->dat) / 520
     ) return NULL;
 
     uint8_t *data = platform_heap_alloc(size, 1);
@@ -86,7 +86,7 @@ uint8_t *file_stream_read(struct file_stream *self, int32_t file, ptrdiff_t *out
 
         if (
             next_sector < 0 ||
-            (ptrdiff_t)next_sector > platform_random_access_file_length(self->dat) / 520
+            next_sector > platform_random_access_file_length(self->dat) / 520
         ) goto err_out;
 
         for (int32_t i = 0; i < available; ++i) {
