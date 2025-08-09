@@ -58,12 +58,14 @@ fi
 
 compile() {
     cmd="$CC -c $MAKEFILE_DEP_CFLAGS $platform_cflags $CFLAGS $(escape "$SCRIPT_DIR$1.c")"
-    printf "%s\n" "$cmd"
-    eval "$cmd"
-    if test "$MAKEFILE"; then
-        dep_cmd="mv ${1##*/}.d ${1##*/}.o.d"
+    if test "$2"; then
+        printf "%s\n" "$cmd"
+        eval "$cmd"
+    elif test "$MAKEFILE"; then
+        name="${1##*/}"
+        dep_cmd="mv $name.d $name.o.d"
         eval "$dep_cmd"
-        printf "%s.o:\n\t%s\n\t@%s\ninclude %s.o.d\n" "${1##*/}" "$cmd" "$dep_cmd" "${1##*/}" >> Makefile.temp
+        printf "%s.o:\n\t%s\n\t@%s\ninclude %s.o.d\n" "$name" "$cmd" "$dep_cmd" "$name" >> Makefile.temp
     fi
 }
 
@@ -95,9 +97,11 @@ jagfile \
 pix_font \
 jpeg \
 pix32 \
-pix_map
+pix_map \
+pix8
 do
-    compile "$source" &
+    compile "$source"
+    compile "$source" 1 &
     pids="$pids $!"
     objects="$objects ${source##*/}.o"
     running=$(($running+1))

@@ -16,6 +16,7 @@ int platform_frame_init(int32_t width, int32_t height);
 void platform_print(char *text, size_t text_len);
 void platform_heap_reset(void *address);
 void *platform_heap_alloc(int32_t len, int32_t elem_size_and_align);
+int32_t platform_random(int32_t n);
 
 struct SDL_Surface;
 typedef struct SDL_Surface *platform_image;

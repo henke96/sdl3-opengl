@@ -2,6 +2,7 @@
 #include "jagfile.h"
 #include "pix_font.h"
 #include "packet.h"
+#include "pix2d.h"
 #include "x.h"
 
 static int pix_font_char_lookup[256];
@@ -49,7 +50,7 @@ void pix_font_init(struct pix_font *self, struct jagfile *jagfile, const char *n
                     self->char_mask[i][var11 * y + x] = packet_g1b(&var4);
                 }
             }
-        }
+        } else platform_ABORT();
         if (var12 > self->height) {
             self->height = var12;
         }
@@ -116,5 +117,106 @@ void pix_font_static_init(void) {
 
         found_special:
         pix_font_char_lookup[i] = 62 + special_off;
+    }
+}
+
+int32_t pix_font_string_width(struct pix_font *self, uint8_t *arg0, int32_t arg0_length) {
+    if (arg0 == NULL) return 0;
+
+    int32_t width = 0;
+    for (int32_t i = 0; i < arg0_length; ++i) {
+        if (arg0[i] == 64 /* @ */ && i + 4 < arg0_length && arg0[i + 4] == 64 /* @ */) {
+            i += 4;
+        } else {
+            width += self->draw_width[arg0[i]];
+        }
+    }
+    return width;
+}
+
+static void pix_font_copy_pixels(int32_t *arg0, int8_t *arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) {
+    int32_t var10 = -(arg5 >> 2);
+    int32_t var11 = -(arg5 & 0x3);
+    for (int32_t var12 = -arg6; var12 < 0; ++var12) {
+        // NOTE: Rewritten slightly.
+        for (int32_t var13 = var10; var13 < 0; ++var13) {
+            int32_t temp0 = arg1[arg3];
+            if (temp0 != 0) arg0[arg4] = arg2;
+
+            int32_t temp1 = arg1[arg3 + 1];
+            if (temp1 != 0) arg0[arg4 + 1] = arg2;
+
+            int32_t temp2 = arg1[arg3 + 2];
+            if (temp2 != 0) arg0[arg4 + 2] = arg2;
+
+            int32_t temp3 = arg1[arg3 + 3];
+            if (temp3 != 0) arg0[arg4 + 3] = arg2;
+
+            arg3 += 4;
+            arg4 += 4;
+        }
+        for (int32_t var14 = var11; var14 < 0; ++var14) {
+            int32_t temp = arg1[arg3++];
+            if (temp != 0) arg0[arg4] = arg2;
+            ++arg4;
+        }
+
+        arg4 += arg7;
+        arg3 += arg8;
+    }
+}
+
+static void pix_font_draw_char(int8_t *arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5) {
+    int32_t var7 = pix2d_width * arg2 + arg1;
+    int32_t var8 = pix2d_width - arg3;
+    int32_t var9 = 0;
+    int32_t var10 = 0;
+    if (arg2 < pix2d_top) {
+        int32_t var11 = pix2d_top - arg2;
+        arg4 -= var11;
+        arg2 = pix2d_top;
+        var10 += arg3 * var11;
+        var7 += pix2d_width * var11;
+    }
+    if (arg2 + arg4 >= pix2d_bottom) {
+        arg4 -= arg2 + arg4 - pix2d_bottom + 1;
+    }
+    if (arg1 < pix2d_left) {
+        int32_t var12 = pix2d_left - arg1;
+        arg3 -= var12;
+        arg1 = pix2d_left;
+        var10 += var12;
+        var7 += var12;
+        var9 += var12;
+        var8 += var12;
+    }
+    if (arg1 + arg3 >= pix2d_right) {
+        int32_t var13 = arg1 + arg3 - pix2d_right + 1;
+        arg3 -= var13;
+        var9 += var13;
+        var8 += var13;
+    }
+    if (arg3 > 0 && arg4 > 0) {
+        pix_font_copy_pixels(&pix2d_data[0], arg0, arg5, var10, var7, arg3, arg4, var8, var9);
+    }
+}
+
+void pix_font_draw_string(struct pix_font *self, uint8_t *arg0, int32_t arg0_length, int32_t arg1, int32_t arg3, int32_t arg4) {
+    if (arg0 == NULL) return;
+
+    int32_t var8 = arg3 - self->height;
+    for (int32_t i = 0; i < arg0_length; ++i) {
+        int var10 = pix_font_char_lookup[arg0[i]];
+        if (var10 != 94) {
+            pix_font_draw_char(
+                self->char_mask[var10],
+                self->char_offset_x[var10] + arg4,
+                self->char_offset_y[var10] + var8,
+                self->char_mask_width[var10],
+                self->char_mask_height[var10],
+                arg1
+            );
+        }
+        arg4 += self->char_advance[var10];
     }
 }

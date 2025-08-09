@@ -11,6 +11,7 @@
 #include "file_stream.h"
 #include "pix_font.h"
 #include "pix32.h"
+#include "pix8.h"
 
 struct client_gameshell {
     struct pix_map draw_area;
@@ -20,15 +21,61 @@ struct client_gameshell {
 
 struct client {
     struct client_gameshell gameshell;
-    struct pix_map image_title0;
-    struct pix_map image_title1;
-    struct pix_map image_title2;
-    struct pix_map image_title3;
-    struct pix_map image_title4;
-    struct pix_map image_title5;
-    struct pix_map image_title6;
-    struct pix_map image_title7;
-    struct pix_map image_title8;
+    union {
+        struct {
+            int32_t image_title0_data[128 * 265];
+            struct pix_map image_title0;
+            int32_t image_title1_data[128 * 265];
+            struct pix_map image_title1;
+            int32_t image_title2_data[509 * 171];
+            struct pix_map image_title2;
+            int32_t image_title3_data[360 * 132];
+            struct pix_map image_title3;
+            int32_t image_title4_data[360 * 200];
+            struct pix_map image_title4;
+            int32_t image_title5_data[202 * 238];
+            struct pix_map image_title5;
+            int32_t image_title6_data[203 * 238];
+            struct pix_map image_title6;
+            int32_t image_title7_data[74 * 94];
+            struct pix_map image_title7;
+            int32_t image_title8_data[75 * 94];
+            struct pix_map image_title8;
+            int32_t image_flames_left_data[128 * 265];
+            struct pix32 image_flames_left;
+            int32_t image_flames_right_data[128 * 265];
+            struct pix32 image_flames_right;
+            int32_t flame_gradient0[256];
+            int32_t flame_gradient1[256];
+            int32_t flame_gradient2[256];
+            int32_t flame_gradient[256];
+            int32_t flame_buffer0[32768];
+            int32_t flame_buffer1[32768];
+            int32_t flame_buffer2[32768];
+            int32_t flame_buffer3[32768];
+        } title;
+        struct {
+
+        } game;
+    } s;
+    struct pix8 image_titlebox;
+    struct pix8 image_titlebutton;
+    struct pix8 image_redstone1;
+    struct pix8 image_redstone2;
+    struct pix8 image_redstone3;
+    struct pix8 image_redstone1h;
+    struct pix8 image_redstone2h;
+    struct pix8 image_redstone1v;
+    struct pix8 image_redstone2v;
+    struct pix8 image_redstone3v;
+    struct pix8 image_redstone1hv;
+    struct pix8 image_redstone2hv;
+    struct pix8 image_backbase1;
+    struct pix8 image_backbase2;
+    struct pix8 image_backhmid1;
+    struct pix8 image_invback;
+    struct pix8 image_chatback;
+    struct pix8 image_runes[12];
     struct pix_font font_plain_11;
     struct pix_font font_plain_12;
     struct pix_font font_bold_12;
@@ -36,6 +83,7 @@ struct client {
     struct jagfile jag_title;
     struct file_stream file_streams[5];
     int32_t jag_checksum[9];
+    bool flame_active;
     bool redraw_frame;
 };
 
@@ -74,40 +122,31 @@ static void client_load_title(void) {
     // this.areaBackbase2 = null;
     // this.areaBackhmid1 = null;
 
-    static int32_t image_title0_data[128 * 265];
-    pix_map_init(&client.image_title0, 128, 265, &image_title0_data[0]);
+    pix_map_init(&client.s.title.image_title0, 128, 265, &client.s.title.image_title0_data[0]);
     pix2d_clear();
 
-    static int32_t image_title1_data[128 * 265];
-    pix_map_init(&client.image_title1, 128, 265, &image_title1_data[0]);
+    pix_map_init(&client.s.title.image_title1, 128, 265, &client.s.title.image_title1_data[0]);
     pix2d_clear();
 
-    static int32_t image_title2_data[509 * 171];
-    pix_map_init(&client.image_title2, 509, 171, &image_title2_data[0]);
+    pix_map_init(&client.s.title.image_title2, 509, 171, &client.s.title.image_title2_data[0]);
     pix2d_clear();
 
-    static int32_t image_title3_data[360 * 132];
-    pix_map_init(&client.image_title3, 360, 132, &image_title3_data[0]);
+    pix_map_init(&client.s.title.image_title3, 360, 132, &client.s.title.image_title3_data[0]);
     pix2d_clear();
 
-    static int32_t image_title4_data[360 * 200];
-    pix_map_init(&client.image_title4, 360, 200, &image_title4_data[0]);
+    pix_map_init(&client.s.title.image_title4, 360, 200, &client.s.title.image_title4_data[0]);
     pix2d_clear();
 
-    static int32_t image_title5_data[202 * 238];
-    pix_map_init(&client.image_title5, 202, 238, &image_title5_data[0]);
+    pix_map_init(&client.s.title.image_title5, 202, 238, &client.s.title.image_title5_data[0]);
     pix2d_clear();
 
-    static int32_t image_title6_data[203 * 238];
-    pix_map_init(&client.image_title6, 203, 238, &image_title6_data[0]);
+    pix_map_init(&client.s.title.image_title6, 203, 238, &client.s.title.image_title6_data[0]);
     pix2d_clear();
 
-    static int32_t image_title7_data[74 * 94];
-    pix_map_init(&client.image_title7, 74, 94, &image_title7_data[0]);
+    pix_map_init(&client.s.title.image_title7, 74, 94, &client.s.title.image_title7_data[0]);
     pix2d_clear();
 
-    static int32_t image_title8_data[75 * 94];
-    pix_map_init(&client.image_title8, 75, 94, &image_title8_data[0]);
+    pix_map_init(&client.s.title.image_title8, 75, 94, &client.s.title.image_title8_data[0]);
     pix2d_clear();
 
     // TODO:
@@ -119,14 +158,70 @@ static void client_load_title(void) {
     client.redraw_frame = true;
 }
 
-static void client_draw_progress(int32_t percent, char *message) {
+static void client_draw_progress(int32_t percent, uint8_t *message, int32_t message_len) {
     // TODO:
     // this.lastProgressPercent = percent;
     // this.lastProgressMessage = message;
 
-    // NOTE: client_load_title() moved out of this function.
+    // NOTE: client_load_title() moved out of this function. TODO?
+    // TODO: 
+    // if (this.jagTitle == null) {
+    //     super.drawProgress(percent, message);
+    //     return;
+    // }
 
-    // TODO
+    pix_map_bind(&client.s.title.image_title4);
+
+    int32_t x = 360;
+    int32_t y = 200;
+
+    int32_t offset_y = 20;
+    // java: "RuneScape is loading - please wait..."
+    uint8_t string[] = {
+        82, 117,  110, 101, 83, 99, 97, 112, 101,
+        32,
+        105, 115,
+        32,
+        108, 111, 97, 100, 105, 110, 103,
+        32,
+        45,
+        32,
+        112, 108, 101, 97, 115, 101,
+        32,
+        119, 97, 105, 116, 46, 46, 46
+    };
+    pix_font_draw_string_center(
+        &client.font_bold_12,
+        x / 2,
+        0xFFFFFF,
+        &string[0], sizeof(string),
+        y / 2 - 26 - offset_y
+    );
+
+    int32_t mid_y = y / 2 - 18 - offset_y;
+    pix2d_draw_rect(34, 304, 0x8C1111, x / 2 - 152, mid_y);
+    pix2d_draw_rect(32, 302, 0, x / 2 - 151, mid_y + 1);
+    pix2d_fill_rect(0x8C1111, percent * 3, 30, x / 2 - 150, mid_y + 2);
+    pix2d_fill_rect(0, 300 - percent * 3, 30, percent * 3 + (x / 2 - 150), mid_y + 2);
+    pix_font_draw_string_center(&client.font_bold_12, x / 2, 0xFFFFFF, message, message_len, y / 2 + 5 - offset_y);
+
+    pix_map_draw(&client.s.title.image_title4, 202, 171);
+
+    if (client.redraw_frame) {
+        client.redraw_frame = false;
+
+        if (!client.flame_active) {
+            pix_map_draw(&client.s.title.image_title0, 0, 0);
+            pix_map_draw(&client.s.title.image_title1, 637, 0);
+        }
+
+        pix_map_draw(&client.s.title.image_title2, 128, 0);
+        pix_map_draw(&client.s.title.image_title3, 202, 371);
+        pix_map_draw(&client.s.title.image_title5, 0, 265);
+        pix_map_draw(&client.s.title.image_title6, 562, 265);
+        pix_map_draw(&client.s.title.image_title7, 128, 171);
+        pix_map_draw(&client.s.title.image_title8, 562, 171);
+    }
 }
 
 static void client_get_jag_file(int32_t crc, char *name, int32_t file, char *display_name, struct jagfile *out_file) {
@@ -158,31 +253,31 @@ static void client_load_title_background(void) {
     struct pix32 background;
     pix32_init_jpeg(&background, src, src_length);
 
-    pix_map_bind(&client.image_title0);
+    pix_map_bind(&client.s.title.image_title0);
     pix32_blit_opaque(&background, 0, 0);
 
-    pix_map_bind(&client.image_title1);
+    pix_map_bind(&client.s.title.image_title1);
     pix32_blit_opaque(&background, -637, 0);
 
-    pix_map_bind(&client.image_title2);
+    pix_map_bind(&client.s.title.image_title2);
     pix32_blit_opaque(&background, -128, 0);
 
-    pix_map_bind(&client.image_title3);
+    pix_map_bind(&client.s.title.image_title3);
     pix32_blit_opaque(&background, -202, -371);
 
-    pix_map_bind(&client.image_title4);
+    pix_map_bind(&client.s.title.image_title4);
     pix32_blit_opaque(&background, -202, -171);
 
-    pix_map_bind(&client.image_title5);
+    pix_map_bind(&client.s.title.image_title5);
     pix32_blit_opaque(&background, 0, -265);
 
-    pix_map_bind(&client.image_title6);
+    pix_map_bind(&client.s.title.image_title6);
     pix32_blit_opaque(&background, -562, -265);
 
-    pix_map_bind(&client.image_title7);
+    pix_map_bind(&client.s.title.image_title7);
     pix32_blit_opaque(&background, -128, -171);
 
-    pix_map_bind(&client.image_title8);
+    pix_map_bind(&client.s.title.image_title8);
     pix32_blit_opaque(&background, -562, -171);
 
     // draw right side (mirror image)
@@ -197,55 +292,154 @@ static void client_load_title_background(void) {
         }
     }
 
-    pix_map_bind(&client.image_title0);
+    pix_map_bind(&client.s.title.image_title0);
     pix32_blit_opaque(&background, 382, 0);
 
-    pix_map_bind(&client.image_title1);
+    pix_map_bind(&client.s.title.image_title1);
     pix32_blit_opaque(&background, -255, 0);
 
-    pix_map_bind(&client.image_title2);
+    pix_map_bind(&client.s.title.image_title2);
     pix32_blit_opaque(&background, 254, 0);
 
-    pix_map_bind(&client.image_title3);
+    pix_map_bind(&client.s.title.image_title3);
     pix32_blit_opaque(&background, 180, -371);
 
-    pix_map_bind(&client.image_title4);
+    pix_map_bind(&client.s.title.image_title4);
     pix32_blit_opaque(&background, 180, -171);
 
-    pix_map_bind(&client.image_title5);
+    pix_map_bind(&client.s.title.image_title5);
     pix32_blit_opaque(&background, 382, -265);
 
-    pix_map_bind(&client.image_title6);
+    pix_map_bind(&client.s.title.image_title6);
     pix32_blit_opaque(&background, -180, -265);
 
-    pix_map_bind(&client.image_title7);
+    pix_map_bind(&client.s.title.image_title7);
     pix32_blit_opaque(&background, 254, -171);
 
-    pix_map_bind(&client.image_title8);
+    pix_map_bind(&client.s.title.image_title8);
     pix32_blit_opaque(&background, -180, -171);
 
     struct pix32 logo;
     // NOTE: Adding ".dat" suffix here instead of inside of `pix32_init_jagfile`.
     pix32_init_jagfile(&logo, &client.jag_title, x_STR_COMMA_LEN("logo.dat"), 0);
-    pix_map_bind(&client.image_title2);
+    pix_map_bind(&client.s.title.image_title2);
     pix32_draw(&logo, 382 - logo.crop_right / 2 - 128, 18);
 
     platform_heap_reset(src);
+}
 
-    // TODO: remove
-    pix_map_draw(&client.image_title0, 0, 0);
-    pix_map_draw(&client.image_title1, 637, 0);
-    pix_map_draw(&client.image_title2, 128, 0);
-    pix_map_draw(&client.image_title3, 202, 371);
-    pix_map_draw(&client.image_title4, 202, 171);
-    pix_map_draw(&client.image_title5, 0, 265);
-    pix_map_draw(&client.image_title6, 562, 265);
-    pix_map_draw(&client.image_title7, 128, 171);
-    pix_map_draw(&client.image_title8, 562, 171);
+static void client_update_flame_buffer(struct pix8 *image) {
+    int32_t height = 256;
+
+    platform_MEMSET(&client.s.title.flame_buffer0[0], 0, sizeof(client.s.title.flame_buffer0));
+
+    for (int i = 0; i < 5000; ++i) {
+        int32_t rand = platform_random(128 * height);
+        client.s.title.flame_buffer0[rand] = platform_random(256);
+    }
+
+    int32_t *flame_buffer0 = &client.s.title.flame_buffer0[0];
+    int32_t *flame_buffer1 = &client.s.title.flame_buffer1[0];
+    for (int i = 0; i < 20; ++i) {
+        for (int32_t y = 1; y < height - 1; ++y) {
+            for (int32_t x = 1; x < 127; ++x) {
+                int32_t index = (y << 7) + x;
+                flame_buffer1[index] = (
+                    flame_buffer0[index - 1] +
+                    flame_buffer0[index + 1] + 
+                    flame_buffer0[index - 128] +
+                    flame_buffer0[index + 128]
+                ) / 4;
+            }
+        }
+
+        int32_t *last = flame_buffer0;
+        flame_buffer0 = flame_buffer1;
+        flame_buffer1 = last;
+    }
+
+    if (image != NULL) {
+        int32_t off = 0;
+
+        for (int32_t y = 0; y < image->crop_bottom; ++y) {
+            for (int32_t x = 0; x < image->crop_right; ++x) {
+                if (image->pixels[off++] != 0) {
+                    int32_t x0 = x + 16 + image->crop_left;
+                    int32_t y0 = y + 16 + image->crop_top;
+                    int32_t index = (y0 << 7) + x0;
+
+                    client.s.title.flame_buffer0[index] = 0;
+                }
+            }
+        }
+    }
+}
+
+static void client_load_title_images(void) {
+    // NOTE: titlebox, titlebutton and runes loading moved out of this function.
+
+    pix32_init(&client.s.title.image_flames_left, 128, 265, &client.s.title.image_flames_left_data[0]);
+    pix32_init(&client.s.title.image_flames_right, 128, 265, &client.s.title.image_flames_right_data[0]);
+    platform_MEMCPY(&client.s.title.image_flames_left.pixels[0], &client.s.title.image_title0.data[0], 128 * 265 * 4);
+    platform_MEMCPY(&client.s.title.image_flames_right.pixels[0], &client.s.title.image_title1.data[0], 128 * 265 * 4);
+
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient0[i] = i * 262144;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient0[i + 64] = i * 1024 + 16711680;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient0[i + 128] = i * 4 + 16776960;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient0[i + 192] = 16777215;
+    }
+
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient1[i] = i * 1024;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient1[i + 64] = i * 4 + 65280;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient1[i + 128] = i * 262144 + 65535;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient1[i + 192] = 16777215;
+    }
+
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient2[i] = i * 4;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient2[i + 64] = i * 262144 + 255;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient2[i + 128] = i * 1024 + 16711935;
+    }
+    for (int32_t i = 0; i < 64; ++i) {
+        client.s.title.flame_gradient2[i + 192] = 16777215;
+    }
+
+    // NOTE: `flame_buffer0` is zeroed in `client_update_flame_buffer`.
+    platform_MEMSET(&client.s.title.flame_buffer1[0], 0, sizeof(client.s.title.flame_buffer1));
+    client_update_flame_buffer(NULL);
+    // TODO: zero flame buffer 2 and 3?
+
+    // java: "Connecting to fileserver"
+    uint8_t message[] = {
+        67, 111, 110, 110, 101, 99, 116, 105, 110, 103,
+        32,
+        116, 111,
+        32,
+        102, 105, 108, 101, 115, 101, 114, 118, 101, 114
+    };
+    client_draw_progress(10, &message[0], sizeof(message));
 }
 
 // java: load() up until TODO
-static void client_load1(void) {
+static void client_load0(void) {
     // NOTE: Skipping mindel, errorStarted, and errorHost logic.
 
     // TODO: if (SignLink.cache_dat != null) {
@@ -278,6 +472,15 @@ static void client_load1(void) {
     pix_font_init(&client.font_quill_8, &client.jag_title, x_STR_COMMA_LEN("q8.dat"));
     
     client_load_title_background();
+    // NOTE: Moved out of `client_load_title_images`.
+    // NOTE: Adding ".dat" suffix here instead of inside of `pix8_init`.
+    pix8_init(&client.image_titlebox, &client.jag_title, x_STR_COMMA_LEN("titlebox.dat"), 0);
+    pix8_init(&client.image_titlebutton, &client.jag_title, x_STR_COMMA_LEN("titlebutton.dat"), 0);
+    for (int i = 0; i < 12; ++i) {
+        pix8_init(&client.image_runes[i], &client.jag_title, x_STR_COMMA_LEN("runes.dat"), i);
+    }
+    client_load_title_images();
+
     // TODO
 }
 
@@ -295,11 +498,13 @@ static int client_gameshell_init_application(int32_t height, int32_t width, int3
     // using system fonts. NOTE: We avoid system fonts completely.
     client_load_title();
     // run() continues by calling `this.load();`
-    client_load1();
+    client_load0();
     return 0;
 }
 
 static void client_init(void) {
+    client.flame_active = false;
+    client.redraw_frame = false;
     // TODO: default initialisation of client fields
 }
 
@@ -350,7 +555,7 @@ int client_main(int argc, char **argv) {
         // SignLink.startpriv(InetAddress.getLocalHost());
 
         client_init();
-        static int32_t draw_area_data[503 * 765];
+        static int32_t draw_area_data[503 * 765]; // TODO: Move into client.s.game?
         return client_gameshell_init_application(503, 765, &draw_area_data[0]);
     } else {
         platform_print(x_STR_COMMA_LEN("Usage: node-id, port-offset, [lowmem/highmem], [free/members], storeid\n"));

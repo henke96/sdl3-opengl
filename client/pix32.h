@@ -8,6 +8,7 @@ struct pix32 { // TODO: extends Pix2D
     int32_t crop_left;
 };
 
+void pix32_init(struct pix32 *self, int32_t width, int32_t height, int32_t *data);
 // NOTE: Caller must add ".dat" suffix.
 void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char *name, int32_t name_length, int32_t arg2);
 void pix32_init_jpeg(struct pix32 *self, uint8_t *jpeg, int32_t jpeg_length);

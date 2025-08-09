@@ -6,6 +6,16 @@
 #include "packet.h"
 #include "x.h"
 
+void pix32_init(struct pix32 *self, int32_t width, int32_t height, int32_t *data) {
+    self->pixels = data;
+    self->crop_right = width;
+    self->width = width;
+    self->crop_bottom = height;
+    self->height = height;
+    self->crop_left = 0;
+    self->crop_right = 0;
+}
+
 // NOTE: Caller must add ".dat" suffix.
 void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char *name, int32_t name_length, int32_t arg2) {
     // NOTE: Once we have the pixel data it will be moved here.
@@ -59,7 +69,7 @@ void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char 
                 self->pixels[self->crop_right * y + x] = var7[packet_g1(&var4)];
             }
         }
-    }
+    } else platform_ABORT();
 
     // NOTE: Added to not leak `var4_data`, `var5_data` and `var7`.
     platform_MEMMOVE(&pixels_moved[0], &self->pixels[0], len * 4);

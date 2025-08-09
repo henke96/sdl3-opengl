@@ -78,6 +78,10 @@ void platform_print(char *text, size_t text_len) {
     SDL_Log("%.*s", (int)text_len, text);
 }
 
+int32_t platform_random(int32_t n) {
+    return SDL_rand(n);
+}
+
 void platform_heap_reset(void *address) {
     platform_heap_pos = address;
 }
