@@ -55,7 +55,7 @@ struct client {
             int32_t flame_buffer3[32768];
         } title;
         struct {
-
+            int TODO;
         } game;
     } s;
     struct pix8 image_titlebox;
@@ -83,9 +83,75 @@ struct client {
     struct jagfile jag_title;
     struct file_stream file_streams[5];
     int32_t jag_checksum[9];
+    int32_t flame_cycle0;
+    int32_t flame_gradient_cycle0;
+    int32_t flame_gradient_cycle1;
+    int32_t flame_line_offset[256];
     bool flame_active;
     bool redraw_frame;
 };
+
+static struct {
+    int64_t last;
+    int state;
+} client_run_flames_ctx;
+
+static inline void client_run_flames_ctx_init(void) {
+    client_run_flames_ctx.state = 0;
+}
+
+struct client_get_jag_file_ctx {
+    int32_t crc;
+    const char *name;
+    int32_t file;
+    const char *display_name;
+    struct jagfile *out_file;
+
+    uint8_t *data;
+    int32_t data_length;
+    int32_t retry;
+    
+    struct file_stream_read_ctx read_ctx;
+    int state;
+};
+
+static inline void client_get_jag_file_ctx_init(
+    struct client_get_jag_file_ctx *self,
+    int32_t crc,
+    const char *name,
+    int32_t file,
+    const char *display_name,
+    struct jagfile *out_file
+) {
+    self->crc = crc;
+    self->name = name;
+    self->file = file;
+    self->display_name = display_name;
+    self->out_file = out_file;
+    self->state = 0;
+}
+
+struct client_load_ctx {
+    struct client_get_jag_file_ctx get_jag_file_ctx;
+    int state;
+};
+
+static inline void client_load_ctx_init(struct client_load_ctx *self) {
+    self->state = 0;
+}
+
+static struct {
+    union {
+        struct {
+            struct client_load_ctx load_ctx;
+        } s1;
+    } s;
+    int state;
+} client_run_ctx;
+
+static inline void client_run_ctx_init(void) {
+    client_run_ctx.state = 0;
+}
 
 static struct client client;
 
@@ -224,26 +290,42 @@ static void client_draw_progress(int32_t percent, uint8_t *message, int32_t mess
     }
 }
 
-static void client_get_jag_file(int32_t crc, char *name, int32_t file, char *display_name, struct jagfile *out_file) {
-    uint8_t *data = NULL;
-    int32_t retry = 5;
+static int client_get_jag_file(struct client_get_jag_file_ctx *ctx) {
+    int status;
 
-    // TODO: if (this.fileStreams[0] != null) {
-    int32_t data_length;
-    data = file_stream_read(&client.file_streams[0], file, &data_length);
+    switch (ctx->state) {
+        case 0:
+        ctx->state = 1;
 
-    if (data != NULL) {
-        int32_t checksum = util_crc32(data, data_length);
-        if (crc != checksum) data = NULL;
+        ctx->data = NULL;
+        ctx->retry = 5;
+
+        // TODO: if (this.fileStreams[0] != null) {
+        file_stream_read_ctx_init(&ctx->read_ctx, ctx->file);
+
+        case 1:
+        status = file_stream_read(&client.file_streams[0], &ctx->read_ctx);
+        if (status <= 0) return status;
+        ctx->state = 2;
+
+        ctx->data = ctx->read_ctx.data;
+        ctx->data_length = ctx->read_ctx.size;
+
+        if (ctx->data != NULL) {
+            int32_t checksum = util_crc32(ctx->data, ctx->data_length);
+            if (ctx->crc != checksum) ctx->data = NULL;
+        }
+
+        if (ctx->data != NULL) {
+            jagfile_init(ctx->out_file, ctx->data, ctx->data_length);
+            return 1;
+        }
+
+        // TODO: Download loop..
+        for (;;);
+
+        default: platform_UNREACHABLE();
     }
-
-    if (data != NULL) {
-        jagfile_init(out_file, data, data_length);
-        return;
-    }
-
-    // TODO: Download loop..
-    for (;;);
 }
 
 static void client_load_title_background(void) {
@@ -425,6 +507,8 @@ static void client_load_title_images(void) {
     // NOTE: `flame_buffer0` is zeroed in `client_update_flame_buffer`.
     platform_MEMSET(&client.s.title.flame_buffer1[0], 0, sizeof(client.s.title.flame_buffer1));
     client_update_flame_buffer(NULL);
+    platform_MEMSET(&client.s.title.flame_buffer3[0], 0, sizeof(client.s.title.flame_buffer3));
+    platform_MEMSET(&client.s.title.flame_buffer2[0], 0, sizeof(client.s.title.flame_buffer2));
     // TODO: zero flame buffer 2 and 3?
 
     // java: "Connecting to fileserver"
@@ -436,52 +520,75 @@ static void client_load_title_images(void) {
         102, 105, 108, 101, 115, 101, 114, 118, 101, 114
     };
     client_draw_progress(10, &message[0], sizeof(message));
+
+    if (!client.flame_active) {
+        // java: this.flamesThread = true;
+        client.flame_active = true;
+        // java: this.startThread(this, 2);
+        client_run_flames_ctx_init();
+    }
 }
 
-// java: load() up until TODO
-static void client_load0(void) {
-    // NOTE: Skipping mindel, errorStarted, and errorHost logic.
+static int client_load(struct client_load_ctx *ctx) {
+    int status;
 
-    // TODO: if (SignLink.cache_dat != null) {
-    for (int i = 0; i < 5; ++i) {
-        file_stream_init(
-            &client.file_streams[i],
-            i + 1,
-            platform_CACHE_IDX(i), // java: SignLink.cache_idx[i]
-            platform_CACHE_DAT, // java: SignLink.cache_dat
-            500000
-        );
-    }
+    switch (ctx->state) {
+        case 0:
+        ctx->state = 1;
+        // NOTE: Skipping mindel, errorStarted, and errorHost logic.
 
-    // NOTE: Hardcoding cache checksums instead of fetching them over HTTP.
-    client.jag_checksum[0] = 0;
-    client.jag_checksum[1] = 126707642; // TODO: 2004scape: -945108033
-    client.jag_checksum[2] = 1573679574; // TODO: 2004scape: 1219858706
-    client.jag_checksum[3] = 2074207176; // TODO: 2004scape: -1064880969
-    client.jag_checksum[4] = -151945349; // TODO: 2004scape: 1633496510
-    client.jag_checksum[5] = -390182005; // TODO: 2004scape: -171619975
-    client.jag_checksum[6] = 245278618; // TODO: 2004scape: 399321136
-    client.jag_checksum[7] = -87627495;
-    client.jag_checksum[8] = -855112082;
+        // TODO: if (SignLink.cache_dat != null) {
+        for (int i = 0; i < 5; ++i) {
+            file_stream_init(
+                &client.file_streams[i],
+                i + 1,
+                platform_CACHE_IDX(i), // java: SignLink.cache_idx[i]
+                platform_CACHE_DAT, // java: SignLink.cache_dat
+                500000
+            );
+        }
 
-    client_get_jag_file(client.jag_checksum[1], "title", 1, "title screen", &client.jag_title);
-    // NOTE: Adding ".dat" suffix here instead of inside of `pix_font_init`.
-    pix_font_init(&client.font_plain_11, &client.jag_title, x_STR_COMMA_LEN("p11.dat"));
-    pix_font_init(&client.font_plain_12, &client.jag_title, x_STR_COMMA_LEN("p12.dat"));
-    pix_font_init(&client.font_bold_12, &client.jag_title, x_STR_COMMA_LEN("b12.dat"));
-    pix_font_init(&client.font_quill_8, &client.jag_title, x_STR_COMMA_LEN("q8.dat"));
+        // TODO: Hardcoded cache checksums instead of fetching them over HTTP.
+        client.jag_checksum[0] = 0;
+        client.jag_checksum[1] = 126707642; // TODO: 2004scape: -945108033
+        client.jag_checksum[2] = 1573679574; // TODO: 2004scape: 1219858706
+        client.jag_checksum[3] = 2074207176; // TODO: 2004scape: -1064880969
+        client.jag_checksum[4] = -151945349; // TODO: 2004scape: 1633496510
+        client.jag_checksum[5] = -390182005; // TODO: 2004scape: -171619975
+        client.jag_checksum[6] = 245278618; // TODO: 2004scape: 399321136
+        client.jag_checksum[7] = -87627495;
+        client.jag_checksum[8] = -855112082;
+
+        client_get_jag_file_ctx_init(&ctx->get_jag_file_ctx, client.jag_checksum[1], "title", 1, "title screen", &client.jag_title);
+
+        case 1:
+        status = client_get_jag_file(&ctx->get_jag_file_ctx);
+        if (status <= 0) return status;
+        ctx->state = 2;
+
+        // NOTE: Adding ".dat" suffix here instead of inside of `pix_font_init`.
+        pix_font_init(&client.font_plain_11, &client.jag_title, x_STR_COMMA_LEN("p11.dat"));
+        pix_font_init(&client.font_plain_12, &client.jag_title, x_STR_COMMA_LEN("p12.dat"));
+        pix_font_init(&client.font_bold_12, &client.jag_title, x_STR_COMMA_LEN("b12.dat"));
+        pix_font_init(&client.font_quill_8, &client.jag_title, x_STR_COMMA_LEN("q8.dat"));
     
-    client_load_title_background();
-    // NOTE: Moved out of `client_load_title_images`.
-    // NOTE: Adding ".dat" suffix here instead of inside of `pix8_init`.
-    pix8_init(&client.image_titlebox, &client.jag_title, x_STR_COMMA_LEN("titlebox.dat"), 0);
-    pix8_init(&client.image_titlebutton, &client.jag_title, x_STR_COMMA_LEN("titlebutton.dat"), 0);
-    for (int i = 0; i < 12; ++i) {
-        pix8_init(&client.image_runes[i], &client.jag_title, x_STR_COMMA_LEN("runes.dat"), i);
-    }
-    client_load_title_images();
+        client_load_title_background();
+        // NOTE: Moved out of `client_load_title_images`.
+        // NOTE: Adding ".dat" suffix here instead of inside of `pix8_init`.
+        pix8_init(&client.image_titlebox, &client.jag_title, x_STR_COMMA_LEN("titlebox.dat"), 0);
+        pix8_init(&client.image_titlebutton, &client.jag_title, x_STR_COMMA_LEN("titlebutton.dat"), 0);
+        for (int i = 0; i < 12; ++i) {
+            pix8_init(&client.image_runes[i], &client.jag_title, x_STR_COMMA_LEN("runes.dat"), i);
+        }
+        client_load_title_images();
+        // NOTE: Yield to draw progress.
+        return 0;
 
-    // TODO
+        case 2:
+        return 1;  // TODO
+
+        default: platform_UNREACHABLE();
+    }
 }
 
 static int client_gameshell_init_application(int32_t height, int32_t width, int32_t *draw_area_data) {
@@ -493,19 +600,239 @@ static int client_gameshell_init_application(int32_t height, int32_t width, int3
     pix_map_init(&client.gameshell.draw_area, width, height, draw_area_data);
 
     // java: this.startThread(this, 1);
-    // This starts run() which calls `this.drawProgress(0, "Loading...");` which
-    // in turn calls `this.loadTitle();` before attempting to draw progress
-    // using system fonts. NOTE: We avoid system fonts completely.
-    client_load_title();
-    // run() continues by calling `this.load();`
-    client_load0();
+    client_run_ctx_init();
+    client_load_title(); // TODO
     return 0;
 }
 
 static void client_init(void) {
+    platform_MEMSET(&client.flame_line_offset, 0, sizeof(client.flame_line_offset));
+    client.flame_cycle0 = 0;
+    client.flame_gradient_cycle0 = 0;
+    client.flame_gradient_cycle1 = 1;
     client.flame_active = false;
     client.redraw_frame = false;
     // TODO: default initialisation of client fields
+}
+
+int client_run(void) {
+    int status;
+
+    switch (client_run_ctx.state) {
+        case 0:
+        client_run_ctx.state = 1;
+
+        // NOTE: Skipping adding listeners.
+
+        // TODO client_draw_progress(0, x_STR_COMMA_LEN("Loading..."));
+        client_load_ctx_init(&client_run_ctx.s.s1.load_ctx);
+        return 0;
+
+        case 1:
+        status = client_load(&client_run_ctx.s.s1.load_ctx);
+        if (status <= 0) return status;
+        client_run_ctx.state = 2;
+
+        case 2:
+        // TODO
+        return 1;
+
+        default: platform_UNREACHABLE();
+    }
+}
+
+static void client_update_flames(void) {
+    int32_t height = 256;
+
+    for (int32_t x = 10; x < 117; ++x) {
+        int32_t rand = platform_random(100);
+        if (rand < 50) {
+            client.s.title.flame_buffer3[((height - 2) << 7) + x] = 255;
+        }
+    }
+
+    for (int i = 0; i < 100; ++i) {
+        int32_t x = platform_random(124) + 2;
+        int32_t y = platform_random(128) + 128;
+        int32_t index = (y << 7) + x;
+
+        client.s.title.flame_buffer3[index] = 192;
+    }
+
+    for (int32_t y = 1; y < height - 1; ++y) {
+        for (int32_t x = 1; x < 127; ++x) {
+            int32_t index = (y << 7) + x;
+            client.s.title.flame_buffer2[index] = (
+                client.s.title.flame_buffer3[index - 1] +
+                client.s.title.flame_buffer3[index + 1] +
+                client.s.title.flame_buffer3[index - 128] +
+                client.s.title.flame_buffer3[index + 128]
+            ) / 4;
+        }
+    }
+
+    client.flame_cycle0 += 128;
+
+    if (client.flame_cycle0 > (int32_t)x_ARRAY_LEN(client.s.title.flame_buffer0)) {
+        client.flame_cycle0 -= (int32_t)x_ARRAY_LEN(client.s.title.flame_buffer0);
+
+        int32_t rand = platform_random(12);
+        client_update_flame_buffer(&client.image_runes[rand]);
+    }
+
+    for (int32_t y = 1; y < height - 1; ++y) {
+        for (int32_t x = 1; x < 127; ++x) {
+            int32_t index = (y << 7) + x;
+            int32_t intensity = (
+                client.s.title.flame_buffer2[index + 128] -
+                client.s.title.flame_buffer0[(client.flame_cycle0 + index) & (x_ARRAY_LEN(client.s.title.flame_buffer0) - 1)] / 5
+            );
+            if (intensity < 0) intensity = 0;
+
+            client.s.title.flame_buffer3[index] = intensity;
+        }
+    }
+
+    // NOTE: Loop rewritten as memmove.
+    platform_MEMMOVE(&client.flame_line_offset[0], &client.flame_line_offset[1], (height - 1) * sizeof(client.flame_line_offset[0]));
+
+    // TODO
+
+    if (client.flame_gradient_cycle0 > 0) client.flame_gradient_cycle0 -= 4;
+
+    if (client.flame_gradient_cycle1 > 0) client.flame_gradient_cycle1 -= 4;
+
+    if (client.flame_gradient_cycle0 == 0 && client.flame_gradient_cycle1 == 0) {
+        int32_t rand = platform_random(2000);
+
+        if (rand == 0) {
+            client.flame_gradient_cycle0 = 1024;
+        } else if (rand == 1) {
+            client.flame_gradient_cycle1 = 1024;
+        }
+    }
+}
+
+static void client_draw_flames(void) {
+    int32_t height = 256;
+
+    if (client.flame_gradient_cycle0 > 0) {
+        // TODO
+    } else if (client.flame_gradient_cycle1 > 0) {
+        // TODO
+    } else {
+        // NOTE: Replaced loop with memcpy.
+        platform_MEMCPY(&client.s.title.flame_gradient[0], &client.s.title.flame_gradient0[0], sizeof(client.s.title.flame_gradient));
+    }
+
+    // NOTE: Replaced loop with memcpy.
+    platform_MEMCPY(
+        &client.s.title.image_title0.data[0],
+        &client.s.title.image_flames_left.pixels[0],
+        128 * 265 * 4
+    );
+
+    int32_t src_offset = 0;
+    int32_t dst_offset = 1152;
+
+    for (int32_t y = 1; y < height - 1; ++y) {
+        int32_t offset = (height - y) * client.flame_line_offset[y] / height;
+
+        int32_t step = offset + 22;
+        if (step < 0) step = 0;
+
+        src_offset += step;
+
+        for (int32_t x = step; x < 128; ++x) {
+            int32_t value = client.s.title.flame_buffer3[src_offset++];
+
+            if (value != 0) {
+                uint32_t alpha = value;
+                uint32_t inv_alpha = 256 - value;
+                value = client.s.title.flame_gradient[value];
+                int32_t background = client.s.title.image_title0.data[dst_offset];
+
+                client.s.title.image_title0.data[dst_offset] = (
+                    (((value & 0xFF00FF) * alpha + (background & 0xFF00FF) * inv_alpha) & 0xFF00FF00) +
+                    (((value & 0xFF00) * alpha + (background & 0xFF00) * inv_alpha) & 0xFF0000)
+                ) >> 8;
+            }
+            ++dst_offset;
+        }
+
+        dst_offset += step;
+    }
+
+    pix_map_draw(&client.s.title.image_title0, 0, 0);
+
+    // NOTE: Replaced loop with memcpy.
+    platform_MEMCPY(
+        &client.s.title.image_title1.data[0],
+        &client.s.title.image_flames_right.pixels[0],
+        128 * 265 * 4
+    );
+
+    src_offset = 0;
+    dst_offset = 1176;
+
+    for (int32_t y = 1; y < height - 1; ++y) {
+        int32_t offset = (height - y) * client.flame_line_offset[y] / height;
+
+        int32_t step = 103 - offset;
+        dst_offset += offset;
+
+        for (int32_t x = 0; x < step; ++x) {
+            int32_t value = client.s.title.flame_buffer3[src_offset++];
+
+            if (value != 0) {
+                uint32_t alpha = value;
+                uint32_t inv_alpha = 256 - value;
+                value = client.s.title.flame_gradient[value];
+                int32_t background = client.s.title.image_title1.data[dst_offset];
+
+                client.s.title.image_title1.data[dst_offset] = (
+                    (((value & 0xFF00FF) * alpha + (background & 0xFF00FF) * inv_alpha) & 0xFF00FF00) +
+                    (((value & 0xFF00) * alpha + (background & 0xFF00) * inv_alpha) & 0xFF0000)
+                ) >> 8;
+            }
+            ++dst_offset;
+        }
+
+        src_offset += 128 - step;
+        dst_offset += 128 - step - offset;
+    }
+
+    pix_map_draw(&client.s.title.image_title1, 637, 0);
+}
+
+int client_run_flames(void) {
+    switch (client_run_flames_ctx.state) {
+        case 0:
+        // NOTE: Instead a startable thread, wait for `client.flame_active` before starting.
+        if (!client.flame_active) return 0;
+        client_run_flames_ctx.state = 1;
+
+        client_run_flames_ctx.last = platform_current_time_ns();
+        
+        while (client.flame_active) {
+            // TODO: this.flameCycle++;
+
+            client_update_flames();
+            client_update_flames();
+            client_draw_flames();
+
+            // java: Thread.sleep(interval);
+            case 1:;
+            int64_t next = client_run_flames_ctx.last + 40 * 1000000;
+            int status = platform_sleep_until_ns(next);
+            if (status <= 0) return status;
+            client_run_flames_ctx.last = next;
+        }
+        client_run_flames_ctx.state = 0; // Effectively stopping the "thread".
+        return 1;
+
+        default: platform_UNREACHABLE();
+    }
 }
 
 int client_main(int argc, char **argv) {

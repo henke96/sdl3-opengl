@@ -82,6 +82,24 @@ int32_t platform_random(int32_t n) {
     return SDL_rand(n);
 }
 
+int64_t platform_current_time_ns(void) {
+    SDL_Time current_time;
+    if (!SDL_GetCurrentTime(&current_time)) {
+        SDL_Log("SDL_GetCurrentTime failed: %s", SDL_GetError());
+        platform_ABORT();
+    }
+    return current_time;
+}
+
+int platform_sleep_until_ns(int64_t time) {
+    SDL_Time current_time;
+    if (!SDL_GetCurrentTime(&current_time)) {
+        SDL_Log("SDL_GetCurrentTime failed: %s", SDL_GetError());
+        platform_ABORT();
+    }
+    return (current_time >= time);
+}
+
 void platform_heap_reset(void *address) {
     platform_heap_pos = address;
 }
@@ -111,14 +129,24 @@ int32_t platform_random_access_file_length(platform_random_access_file file) {
     return (int32_t)size;
 }
 
-int32_t platform_random_access_file_read(platform_random_access_file file, uint8_t *data, int32_t off, int32_t len) {
-    size_t num_read = SDL_ReadIO(platform_cache_files[file], &data[off], len);
-    if (
-        num_read == 0 &&
-        SDL_GetIOStatus(platform_cache_files[file]) != SDL_IO_STATUS_EOF
-    ) return -1;
-    return (int32_t)num_read;
+int platform_random_access_file_read(platform_random_access_file file, struct platform_random_access_file_read_ctx *ctx) {
+    size_t remaining = ctx->len - ctx->off;
+    size_t num_read = SDL_ReadIO(
+        platform_cache_files[file],
+        &ctx->data[ctx->off],
+        remaining
+    );
+    if (num_read <= 0) {
+        SDL_IOStatus status = SDL_GetIOStatus(platform_cache_files[file]);
+        // TODO EOF?
+        if (status == SDL_IO_STATUS_NOT_READY) return 0;
+        return -1;
+    }
+    ctx->off += num_read;
+    if (ctx->off == ctx->len) return 1;
+    return 0;
 }
+
 
 SDL_Surface *platform_create_image(int32_t *data, int32_t width, int32_t height) {
     SDL_Surface *surface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_XRGB8888, data, width * sizeof(data[0]));;
@@ -137,10 +165,6 @@ void platform_draw_image(platform_image image, int32_t x, int32_t y, int32_t wid
         SDL_Log("SDL_BlitSurface failed: %s", SDL_GetError());
         platform_ABORT();
     }
-    if (!SDL_UpdateWindowSurface(window)) { // TODO: move
-        SDL_Log("SDL_UpdateWindowSurface failed: %s", SDL_GetError());
-        platform_ABORT();
-    }
 }
 
 int main(int argc, char **argv) {
@@ -156,6 +180,17 @@ int main(int argc, char **argv) {
                     if (event.key.key == SDLK_ESCAPE) goto done;
                 }
             }
+        }
+
+        int status = client_run();
+        if (status != 1) SDL_Log("client_run=%d\n", status);
+        if (status < 0) platform_ABORT();
+        status = client_run_flames();
+        if (status != 0) SDL_Log("client_run_flames=%d\n", status);
+        if (status < 0) platform_ABORT();
+        if (!SDL_UpdateWindowSurface(window)) {
+            SDL_Log("SDL_UpdateWindowSurface failed: %s", SDL_GetError());
+            platform_ABORT();
         }
 
         int queued_bytes = SDL_GetAudioStreamQueued(audio_stream);
