@@ -98,7 +98,8 @@ pix_font \
 jpeg \
 pix32 \
 pix_map \
-pix8
+pix8 \
+math
 do
     compile "$source"
     compile "$source" 1 &

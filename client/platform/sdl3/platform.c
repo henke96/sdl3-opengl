@@ -183,10 +183,8 @@ int main(int argc, char **argv) {
         }
 
         int status = client_run();
-        if (status != 1) SDL_Log("client_run=%d\n", status);
         if (status < 0) platform_ABORT();
         status = client_run_flames();
-        if (status != 0) SDL_Log("client_run_flames=%d\n", status);
         if (status < 0) platform_ABORT();
         if (!SDL_UpdateWindowSurface(window)) {
             SDL_Log("SDL_UpdateWindowSurface failed: %s", SDL_GetError());

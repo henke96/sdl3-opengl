@@ -39,7 +39,7 @@ struct platform_random_access_file_read_ctx {
 };
 static inline void platform_random_access_file_read_ctx_init(struct platform_random_access_file_read_ctx *self, uint8_t *data, int32_t len) {
     self->data = data;
-    self->len = len;
+    self->len = (size_t)len;
     self->off = 0;
 }
 int platform_random_access_file_read(platform_random_access_file file, struct platform_random_access_file_read_ctx *ctx);

@@ -12,6 +12,7 @@
 #include "pix_font.h"
 #include "pix32.h"
 #include "pix8.h"
+#include "math.h"
 
 struct client_gameshell {
     struct pix_map draw_area;
@@ -87,18 +88,10 @@ struct client {
     int32_t flame_gradient_cycle0;
     int32_t flame_gradient_cycle1;
     int32_t flame_line_offset[256];
+    int32_t state;
     bool flame_active;
     bool redraw_frame;
 };
-
-static struct {
-    int64_t last;
-    int state;
-} client_run_flames_ctx;
-
-static inline void client_run_flames_ctx_init(void) {
-    client_run_flames_ctx.state = 0;
-}
 
 struct client_get_jag_file_ctx {
     int32_t crc;
@@ -145,6 +138,9 @@ static struct {
         struct {
             struct client_load_ctx load_ctx;
         } s1;
+        struct {
+            int64_t next;
+        } s2;
     } s;
     int state;
 } client_run_ctx;
@@ -153,10 +149,27 @@ static inline void client_run_ctx_init(void) {
     client_run_ctx.state = 0;
 }
 
+static struct {
+    int64_t next;
+    int state;
+} client_run_flames_ctx;
+
+static inline void client_run_flames_ctx_init(void) {
+    client_run_flames_ctx.state = 0;
+}
+
 static struct client client;
 
 static int32_t client_node_id;
 int32_t client_port_offset;
+int32_t client_loop_cycle;
+// NOTE: Extra variables to avoid 128 bit multiplication.
+uint64_t client_loop_cycle_flames_14_high;
+uint64_t client_loop_cycle_flames_14_low;
+uint64_t client_loop_cycle_flames_15_high;
+uint64_t client_loop_cycle_flames_15_low;
+uint64_t client_loop_cycle_flames_16_high;
+uint64_t client_loop_cycle_flames_16_low;
 static bool client_members_world;
 static bool client_low_memory;
 
@@ -609,9 +622,10 @@ static void client_init(void) {
     platform_MEMSET(&client.flame_line_offset, 0, sizeof(client.flame_line_offset));
     client.flame_cycle0 = 0;
     client.flame_gradient_cycle0 = 0;
-    client.flame_gradient_cycle1 = 1;
+    client.flame_gradient_cycle1 = 0;
     client.flame_active = false;
     client.redraw_frame = false;
+    client.state = 0;
     // TODO: default initialisation of client fields
 }
 
@@ -633,7 +647,31 @@ int client_run(void) {
         if (status <= 0) return status;
         client_run_ctx.state = 2;
 
-        case 2:
+        client_run_ctx.s.s2.next = platform_current_time_ns();
+
+        while (client.state >= 0) {
+            // TODO
+
+            case 2:;
+            // TODO: Replicate complex logic?
+            int status = platform_sleep_until_ns(client_run_ctx.s.s2.next);
+            if (status <= 0) return status;
+            client_run_ctx.s.s2.next += 20 * 1000000;
+
+            // TODO: move
+            client_loop_cycle = (uint32_t)client_loop_cycle + 1;
+            // 2**64 * (2**32 / (2 * pi)) / 14
+            client_loop_cycle_flames_14_low += 2077145006173219510U;
+            client_loop_cycle_flames_14_high += 48826091U + (client_loop_cycle_flames_14_low < 2077145006173219510U);
+            // 2**64 * (2**32 / (2 * pi)) / 15
+            client_loop_cycle_flames_15_low += 6857800425417551974U;
+            client_loop_cycle_flames_15_high += 45571018U + (client_loop_cycle_flames_15_low < 6857800425417551974U);
+            // 2**64 * (2**32 / (2 * pi)) / 16
+            client_loop_cycle_flames_16_low += 13346716926470036831U;
+            client_loop_cycle_flames_16_high += 42722829U + (client_loop_cycle_flames_16_high < 13346716926470036831U);
+
+            // TODO
+        }
         // TODO
         return 1;
 
@@ -696,7 +734,34 @@ static void client_update_flames(void) {
     // NOTE: Loop rewritten as memmove.
     platform_MEMMOVE(&client.flame_line_offset[0], &client.flame_line_offset[1], (height - 1) * sizeof(client.flame_line_offset[0]));
 
-    // TODO
+    int64_t dummy;
+    int64_t sin_14_16;
+    math_sincos(
+        (int64_t)(client_loop_cycle_flames_14_high + (client_loop_cycle_flames_14_low >> 63)),
+        16 * 16,
+        true,
+        &sin_14_16,
+        &dummy
+    );
+    int64_t sin_15_14;
+    math_sincos(
+        (int64_t)(client_loop_cycle_flames_15_high + (client_loop_cycle_flames_15_low >> 63)),
+        14 * 14,
+        true,
+        &sin_15_14,
+        &dummy
+    );
+    int64_t sin_16_12;
+    math_sincos(
+        (int64_t)(client_loop_cycle_flames_16_high + (client_loop_cycle_flames_16_low >> 63)),
+        12 * 12,
+        true,
+        &sin_16_12,
+        &dummy
+    );
+    client.flame_line_offset[height - 1] = (int32_t)((sin_14_16 + sin_15_14 + sin_16_12) / 0x100000000);
+    // NOTE: Almost fully equivalent to
+    // client.flame_line_offset[height - 1] = (int32_t)(sin(client_loop_cycle / 14.0) * 16.0 + sin(client_loop_cycle / 15.0) * 14.0 + sin(client_loop_cycle / 16.0) * 12.0);
 
     if (client.flame_gradient_cycle0 > 0) client.flame_gradient_cycle0 -= 4;
 
@@ -713,13 +778,37 @@ static void client_update_flames(void) {
     }
 }
 
+static int32_t client_mix(int32_t alpha, int32_t src, int32_t dst) {
+    int32_t inv_alpha = 256 - alpha;
+    return (
+        (((src & 0xFF00FF) * inv_alpha + (dst & 0xFF00FF) * alpha) & 0xFF00FF00) +
+        (((src & 0xFF00) * inv_alpha + (dst & 0xFF00) * alpha) & 0xFF0000)
+    ) >> 8;
+}
+
 static void client_draw_flames(void) {
     int32_t height = 256;
 
     if (client.flame_gradient_cycle0 > 0) {
-        // TODO
+        for (int i = 0; i < 256; ++i) {
+            if (client.flame_gradient_cycle0 > 768) {
+                client.s.title.flame_gradient[i] = client_mix(1024 - client.flame_gradient_cycle0, client.s.title.flame_gradient0[i], client.s.title.flame_gradient1[i]);
+            } else if (client.flame_gradient_cycle0 > 256) {
+                client.s.title.flame_gradient[i] = client.s.title.flame_gradient1[i];
+            } else {
+                client.s.title.flame_gradient[i] = client_mix(256 - client.flame_gradient_cycle0, client.s.title.flame_gradient1[i], client.s.title.flame_gradient0[i]);
+            }
+        }
     } else if (client.flame_gradient_cycle1 > 0) {
-        // TODO
+        for (int i = 0; i < 256; ++i) {
+            if (client.flame_gradient_cycle1 > 768) {
+                client.s.title.flame_gradient[i] = client_mix(1024 - client.flame_gradient_cycle1, client.s.title.flame_gradient0[i], client.s.title.flame_gradient2[i]);
+            } else if (client.flame_gradient_cycle1 > 256) {
+                client.s.title.flame_gradient[i] = client.s.title.flame_gradient2[i];
+            } else {
+                client.s.title.flame_gradient[i] = client_mix(256 - client.flame_gradient_cycle1, client.s.title.flame_gradient2[i], client.s.title.flame_gradient0[i]);
+            }
+        }
     } else {
         // NOTE: Replaced loop with memcpy.
         platform_MEMCPY(&client.s.title.flame_gradient[0], &client.s.title.flame_gradient0[0], sizeof(client.s.title.flame_gradient));
@@ -812,7 +901,8 @@ int client_run_flames(void) {
         if (!client.flame_active) return 0;
         client_run_flames_ctx.state = 1;
 
-        client_run_flames_ctx.last = platform_current_time_ns();
+        // NOTE: Simplified sleep logic. Seems to run ever so slightly slower than Java client.
+        client_run_flames_ctx.next = platform_current_time_ns() + 40 * 1000000;
         
         while (client.flame_active) {
             // TODO: this.flameCycle++;
@@ -823,10 +913,9 @@ int client_run_flames(void) {
 
             // java: Thread.sleep(interval);
             case 1:;
-            int64_t next = client_run_flames_ctx.last + 40 * 1000000;
-            int status = platform_sleep_until_ns(next);
+            int status = platform_sleep_until_ns(client_run_flames_ctx.next);
             if (status <= 0) return status;
-            client_run_flames_ctx.last = next;
+            client_run_flames_ctx.next += 40 * 1000000;
         }
         client_run_flames_ctx.state = 0; // Effectively stopping the "thread".
         return 1;
