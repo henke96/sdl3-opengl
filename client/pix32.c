@@ -6,7 +6,7 @@
 #include "packet.h"
 #include "x.h"
 
-void pix32_init(struct pix32 *self, int32_t width, int32_t height, int32_t *data) {
+void pix32_init(struct pix32 *self, int32_t width, int32_t height, uint32_t *data) {
     self->pixels = data;
     self->crop_right = width;
     self->width = width;
@@ -19,7 +19,7 @@ void pix32_init(struct pix32 *self, int32_t width, int32_t height, int32_t *data
 // NOTE: Caller must add ".dat" suffix.
 void pix32_init_jagfile(struct pix32 *self, struct jagfile *jagfile, const char *name, int32_t name_length, int32_t arg2) {
     // NOTE: Once we have the pixel data it will be moved here.
-    int32_t *pixels_moved = platform_heap_alloc(0, 4);
+    uint32_t *pixels_moved = platform_heap_alloc(0, 4);
 
     // TODO: Rename variables.
     struct packet var4;
@@ -88,13 +88,13 @@ void pix32_init_jpeg(struct pix32 *self, uint8_t *src, int32_t src_length) {
 
 static void pix32_copy_pixels(
     int32_t src_off,
-    int32_t *src,
+    uint32_t *src,
     int32_t arg2,
     int32_t arg4,
     int32_t dest_off,
     int32_t width,
     int32_t height,
-    int32_t *dest
+    uint32_t *dest
 ) {
     for (int32_t i = -height; i < 0; ++i) {
         // NOTE: Replaced loop with memmove.
@@ -144,29 +144,29 @@ void pix32_blit_opaque(struct pix32 *self, int32_t arg0, int32_t arg1) {
     }
 }
 
-static void pix32_copy_pixels2(int32_t *dest, int32_t *src, int32_t src_off, int32_t dest_off, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) {
+static void pix32_copy_pixels2(uint32_t *dest, uint32_t *src, int32_t src_off, int32_t dest_off, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) {
     int32_t var10 = -(arg5 >> 2);
     int32_t var11 = -(arg5 & 0x3);
     for (int32_t i = -arg6; i < 0; ++i) {
         // NOTE: Rewritten slightly.
         for (int32_t j = var10; j < 0; ++j) {
-            int32_t temp0 = src[src_off];
+            uint32_t temp0 = src[src_off];
             if (temp0 != 0) dest[dest_off] = temp0;
 
-            int32_t temp1 = src[src_off + 1];
+            uint32_t temp1 = src[src_off + 1];
             if (temp1 != 0) dest[dest_off + 1] = temp1;
 
-            int32_t temp2 = src[src_off + 2];
+            uint32_t temp2 = src[src_off + 2];
             if (temp2 != 0) dest[dest_off + 2] = temp2;
 
-            int32_t temp3 = src[src_off + 3];
+            uint32_t temp3 = src[src_off + 3];
             if (temp3 != 0) dest[dest_off + 3] = temp3;
 
             src_off += 4;
             dest_off += 4;
         }
         for (int j = var11; j < 0; ++j) {
-            int32_t temp = src[src_off++];
+            uint32_t temp = src[src_off++];
             if (temp != 0) dest[dest_off] = temp;
             ++dest_off;
         }

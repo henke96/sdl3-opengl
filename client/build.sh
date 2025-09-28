@@ -56,34 +56,7 @@ else
     exit 1
 fi
 
-compile() {
-    cmd="$CC -c $MAKEFILE_DEP_CFLAGS $platform_cflags $CFLAGS $(escape "$SCRIPT_DIR$1.c")"
-    if test "$2"; then
-        printf "%s\n" "$cmd"
-        eval "$cmd"
-    elif test "$MAKEFILE"; then
-        name="${1##*/}"
-        dep_cmd="mv $name.d $name.o.d"
-        eval "$dep_cmd"
-        printf "%s.o:\n\t%s\n\t@%s\ninclude %s.o.d\n" "$name" "$cmd" "$dep_cmd" "$name" >> Makefile.temp
-    fi
-}
-
-wait_compile() {
-    set -- $pids
-    wait "$1"
-    shift
-    pids="$@"
-    running=$(($running-1))
-}
-
-test -z "$MAKEFILE" || printf ".POSIX:\n%s:\nMakefile: %s\n\tsh ./rebuild.sh\n" "$OUT_NAME" "$0" > Makefile.temp
-
-pids=
-objects=
-running=0
-for source in \
-$platform_sources \
+sources="$platform_sources \
 client \
 util \
 pix2d \
@@ -99,15 +72,42 @@ jpeg \
 pix32 \
 pix_map \
 pix8 \
-math
+math \
+"
+
+compile() {
+    cmd="$CC -c $MAKEFILE_DEP_CFLAGS $platform_cflags $CFLAGS $(escape "$SCRIPT_DIR$1.c")"
+    if test "$2" = makefilegen; then
+        name="${1##*/}"
+        dep_cmd="mv $name.d $name.o.d"
+        eval "$dep_cmd"
+        printf "%s.o:\n\t%s\n\t@%s\ninclude %s.o.d\n" "$name" "$cmd" "$dep_cmd" "$name" >> Makefile.temp
+    else
+        printf "%s\n" "$cmd"
+        eval "$cmd"
+    fi
+}
+
+wait_compile() {
+    set -- $pids
+    wait "$1"
+    shift
+    pids="$@"
+    running=$(($running-1))
+}
+
+pids=
+objects=
+running=0
+for source in $sources
 do
-    compile "$source"
-    compile "$source" 1 &
+    compile "$source" &
     pids="$pids $!"
     objects="$objects ${source##*/}.o"
     running=$(($running+1))
     test "$running" -lt "$PARALLEL" || wait_compile
 done
+
 for pid in $pids
 do
     wait "$pid"
@@ -116,7 +116,12 @@ done
 cmd="$CC -o $OUT_NAME $LDFLAGS$objects $platform_libs $LDLIBS"
 printf "%s\n" "$cmd"
 eval "$cmd"
+
 if test "$MAKEFILE"; then
-    printf "%s: %s\n\t%s\nclean:\n\trm -f %s%s\n" "$OUT_NAME" "$objects" "$cmd" "$OUT_NAME" "$objects" >> Makefile.temp
+    printf ".POSIX:\n%s: %s\n\t%s\nclean:\n\trm -f %s%s\nMakefile: %s\n\tsh ./rebuild.sh\n" "$OUT_NAME" "$objects" "$cmd" "$OUT_NAME" "$objects" "$0" > Makefile.temp
+    for source in $sources
+    do
+        compile "$source" makefilegen
+    done
     mv Makefile.temp Makefile
 fi

@@ -1,7 +1,7 @@
 struct pix8 {
     int32_t width;
     int32_t height;
-    int32_t *palette;
+    uint32_t *palette;
     int32_t crop_left;
     int32_t crop_top;
     int32_t crop_right;

@@ -2,7 +2,7 @@
 #include "pix2d.h"
 #include "pix_map.h"
 
-void pix_map_init(struct pix_map *self, int32_t width, int32_t height, int32_t *data) {
+void pix_map_init(struct pix_map *self, int32_t width, int32_t height, uint32_t *data) {
     self->width = width;
     self->height = height;
     self->data = data; // java: this.data = new int[height * width];

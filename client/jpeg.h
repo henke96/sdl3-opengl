@@ -52,7 +52,7 @@ struct jpeg {
    int scan_n, order[4];
 };
 
-int32_t *jpeg_decode(
+uint32_t *jpeg_decode(
    struct jpeg *jpeg,
    uint8_t *buffer,
    int32_t buffer_length,

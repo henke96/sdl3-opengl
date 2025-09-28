@@ -1,7 +1,7 @@
 #include "platform.h"
 #include "pix2d.h"
 
-int32_t *pix2d_data;
+uint32_t *pix2d_data;
 int32_t pix2d_width;
 int32_t pix2d_height;
 int32_t pix2d_top;
@@ -12,7 +12,7 @@ int32_t pix2d_safe_width;
 int32_t pix2d_center_x;
 int32_t pix2d_center_y;
 
-void pix2d_bind(int32_t width, int32_t *data, int32_t height) {
+void pix2d_bind(int32_t width, uint32_t *data, int32_t height) {
     pix2d_data = data;
     pix2d_width = width;
     pix2d_height = height;
@@ -68,19 +68,19 @@ void pix2d_fill_rect_trans(int32_t y, int32_t alpha, int32_t height, int32_t wid
     }
 
     int32_t inv_alpha = 256 - alpha;
-    int32_t r0 = (colour >> 16 & 0xFF) * alpha;
-    int32_t g0 = (colour >> 8 & 0xFF) * alpha;
-    int32_t b0 = (colour & 0xFF) * alpha;
+    uint32_t r0 = (colour >> 16 & 0xFF) * alpha;
+    uint32_t g0 = (colour >> 8 & 0xFF) * alpha;
+    uint32_t b0 = (colour & 0xFF) * alpha;
     int32_t step = pix2d_width - width;
     int32_t offset = pix2d_width * y + x;
 
     for (int32_t i = 0; i < height; i++) {
         for (int32_t j = -width; j < 0; j++) {
-            int32_t r1 = (pix2d_data[offset] >> 16 & 0xFF) * inv_alpha;
-            int32_t g1 = (pix2d_data[offset] >> 8 & 0xFF) * inv_alpha;
-            int32_t b1 = (pix2d_data[offset] & 0xFF) * inv_alpha;
+            uint32_t r1 = (pix2d_data[offset] >> 16 & 0xFF) * inv_alpha;
+            uint32_t g1 = (pix2d_data[offset] >> 8 & 0xFF) * inv_alpha;
+            uint32_t b1 = (pix2d_data[offset] & 0xFF) * inv_alpha;
 
-            int32_t rgb = ((b0 + b1) >> 8) + ((r0 + r1) >> 8 << 16) + ((g0 + g1) >> 8 << 8);
+            uint32_t rgb = ((b0 + b1) >> 8) + ((r0 + r1) >> 8 << 16) + ((g0 + g1) >> 8 << 8);
             pix2d_data[offset++] = rgb;
         }
 

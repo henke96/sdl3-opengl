@@ -7,7 +7,7 @@
 // NOTE: Caller must add ".dat" suffix.
 void pix8_init(struct pix8 *self, struct jagfile *jagfile, const char *name, int32_t name_length, int32_t sprite) {
     // NOTE: Once we have the palette and pixel data it will be moved here.
-    int32_t *palette_moved = platform_heap_alloc(0, 4);
+    uint32_t *palette_moved = platform_heap_alloc(0, 4);
 
     struct packet dat;
     int32_t dat_data_length;

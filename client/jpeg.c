@@ -581,7 +581,7 @@ static int stbi__process_scan_header(struct jpeg *z)
    {
       int aa;
       int spec_start = stbi__get8(z);
-      int spec_end   = stbi__get8(z); // should be 63, but might be 0
+      /* int spec_end   = */ stbi__get8(z); // should be 63, but might be 0
       aa = stbi__get8(z);
       int succ_high = (aa >> 4);
       int succ_low  = (aa & 15);
@@ -790,7 +790,7 @@ static uint8_t *stbi__resample_row_generic(uint8_t *out, uint8_t *in_near, uint8
 // this is a reduced-precision calculation of YCbCr-to-RGB introduced
 // to make sure the code produces the same results in both SIMD and scalar
 #define stbi__float2fixed(x)  (((int) ((x) * 4096.0f + 0.5f)) << 8)
-static void stbi__YCbCr_to_RGB_row(int32_t *out, const uint8_t *y, const uint8_t *pcb, const uint8_t *pcr, int32_t count)
+static void stbi__YCbCr_to_RGB_row(uint32_t *out, const uint8_t *y, const uint8_t *pcb, const uint8_t *pcr, int32_t count)
 {
    for (int32_t i = 0; i < count; ++i) {
       uint32_t y_fixed = (y[i] << 20) + (1<<19); // rounding
@@ -799,7 +799,7 @@ static void stbi__YCbCr_to_RGB_row(int32_t *out, const uint8_t *y, const uint8_t
       uint32_t r = y_fixed +  cr* stbi__float2fixed(1.40200f);
       uint32_t g = y_fixed + (cr*-stbi__float2fixed(0.71414f)) + ((cb*-stbi__float2fixed(0.34414f)) & 0xffff0000);
       uint32_t b = y_fixed                                     +   cb* stbi__float2fixed(1.77200f);
-      *out++ = (int32_t)((uint32_t)0xFF000000 + ((r & 0x0FF00000) >> 4) + ((g & 0x0FF00000) >> 12) + ((b & 0x0FF00000) >> 20));
+      *out++ = (uint32_t)0xFF000000 + ((r & 0x0FF00000) >> 4) + ((g & 0x0FF00000) >> 12) + ((b & 0x0FF00000) >> 20);
    }
 }
 
@@ -812,7 +812,7 @@ struct jpeg_resample {
    int ypos;    // which pre-expansion row we're on
 };
 
-int32_t *jpeg_decode(struct jpeg *self, uint8_t *buffer, int32_t buffer_length, int32_t *out_width, int32_t *out_height) {
+uint32_t *jpeg_decode(struct jpeg *self, uint8_t *buffer, int32_t buffer_length, int32_t *out_width, int32_t *out_height) {
    self->img_buffer = buffer;
    self->img_buffer_end = &buffer[buffer_length];
 
@@ -822,7 +822,7 @@ int32_t *jpeg_decode(struct jpeg *self, uint8_t *buffer, int32_t buffer_length, 
    *out_height = self->img_y;
 
    if (!stbi__mul3sizes_valid(self->img_x, self->img_y, 4)) platform_ABORT();
-   int32_t *output = platform_heap_alloc(self->img_x * self->img_y, 4);
+   uint32_t *output = platform_heap_alloc(self->img_x * self->img_y, 4);
 
    struct jpeg_resample res_comp[4];
    for (int k=0; k < jpeg_IMG_N_COMP; ++k) {
@@ -858,7 +858,7 @@ int32_t *jpeg_decode(struct jpeg *self, uint8_t *buffer, int32_t buffer_length, 
 
    // now go ahead and resample
    for (j=0; j < self->img_y; ++j) {
-      int32_t *out = &output[self->img_x * j];
+      uint32_t *out = &output[self->img_x * j];
       for (int k = 0; k < jpeg_IMG_N_COMP; ++k) {
          struct jpeg_resample *r = &res_comp[k];
          int y_bot = r->ystep >= (r->vs >> 1);

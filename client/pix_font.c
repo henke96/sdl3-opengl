@@ -134,7 +134,7 @@ int32_t pix_font_string_width(struct pix_font *self, uint8_t *arg0, int32_t arg0
     return width;
 }
 
-static void pix_font_copy_pixels(int32_t *arg0, int8_t *arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) {
+static void pix_font_copy_pixels(uint32_t *arg0, int8_t *arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) {
     int32_t var10 = -(arg5 >> 2);
     int32_t var11 = -(arg5 & 0x3);
     for (int32_t var12 = -arg6; var12 < 0; ++var12) {

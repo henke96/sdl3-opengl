@@ -148,7 +148,7 @@ int platform_random_access_file_read(platform_random_access_file file, struct pl
 }
 
 
-SDL_Surface *platform_create_image(int32_t *data, int32_t width, int32_t height) {
+SDL_Surface *platform_create_image(uint32_t *data, int32_t width, int32_t height) {
     SDL_Surface *surface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_XRGB8888, data, width * sizeof(data[0]));;
     if (!surface) {
         SDL_Log("SDL_CreateSurfaceFrom failed: %s", SDL_GetError());

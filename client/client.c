@@ -24,36 +24,36 @@ struct client {
     struct client_gameshell gameshell;
     union {
         struct {
-            int32_t image_title0_data[128 * 265];
+            uint32_t image_title0_data[128 * 265];
             struct pix_map image_title0;
-            int32_t image_title1_data[128 * 265];
+            uint32_t image_title1_data[128 * 265];
             struct pix_map image_title1;
-            int32_t image_title2_data[509 * 171];
+            uint32_t image_title2_data[509 * 171];
             struct pix_map image_title2;
-            int32_t image_title3_data[360 * 132];
+            uint32_t image_title3_data[360 * 132];
             struct pix_map image_title3;
-            int32_t image_title4_data[360 * 200];
+            uint32_t image_title4_data[360 * 200];
             struct pix_map image_title4;
-            int32_t image_title5_data[202 * 238];
+            uint32_t image_title5_data[202 * 238];
             struct pix_map image_title5;
-            int32_t image_title6_data[203 * 238];
+            uint32_t image_title6_data[203 * 238];
             struct pix_map image_title6;
-            int32_t image_title7_data[74 * 94];
+            uint32_t image_title7_data[74 * 94];
             struct pix_map image_title7;
-            int32_t image_title8_data[75 * 94];
+            uint32_t image_title8_data[75 * 94];
             struct pix_map image_title8;
-            int32_t image_flames_left_data[128 * 265];
+            uint32_t image_flames_left_data[128 * 265];
             struct pix32 image_flames_left;
-            int32_t image_flames_right_data[128 * 265];
+            uint32_t image_flames_right_data[128 * 265];
             struct pix32 image_flames_right;
-            int32_t flame_gradient0[256];
-            int32_t flame_gradient1[256];
-            int32_t flame_gradient2[256];
-            int32_t flame_gradient[256];
-            int32_t flame_buffer0[32768];
-            int32_t flame_buffer1[32768];
-            int32_t flame_buffer2[32768];
-            int32_t flame_buffer3[32768];
+            uint32_t flame_gradient0[256];
+            uint32_t flame_gradient1[256];
+            uint32_t flame_gradient2[256];
+            uint32_t flame_gradient[256];
+            uint32_t flame_buffer0[32768];
+            uint32_t flame_buffer1[32768];
+            uint32_t flame_buffer2[32768];
+            uint32_t flame_buffer3[32768];
         } title;
         struct {
             int TODO;
@@ -376,7 +376,7 @@ static void client_load_title_background(void) {
     pix32_blit_opaque(&background, -562, -171);
 
     // draw right side (mirror image)
-    int32_t *pixels = platform_heap_alloc(background.crop_right, 4);
+    uint32_t *pixels = platform_heap_alloc(background.crop_right, 4);
     for (int32_t y = 0; y < background.crop_bottom; ++y) {
         for (int32_t x = 0; x < background.crop_right; ++x) {
             pixels[x] = background.pixels[background.crop_right * y + background.crop_right - x - 1];
@@ -433,8 +433,8 @@ static void client_update_flame_buffer(struct pix8 *image) {
         client.s.title.flame_buffer0[rand] = platform_random(256);
     }
 
-    int32_t *flame_buffer0 = &client.s.title.flame_buffer0[0];
-    int32_t *flame_buffer1 = &client.s.title.flame_buffer1[0];
+    uint32_t *flame_buffer0 = &client.s.title.flame_buffer0[0];
+    uint32_t *flame_buffer1 = &client.s.title.flame_buffer1[0];
     for (int i = 0; i < 20; ++i) {
         for (int32_t y = 1; y < height - 1; ++y) {
             for (int32_t x = 1; x < 127; ++x) {
@@ -448,7 +448,7 @@ static void client_update_flame_buffer(struct pix8 *image) {
             }
         }
 
-        int32_t *last = flame_buffer0;
+        uint32_t *last = flame_buffer0;
         flame_buffer0 = flame_buffer1;
         flame_buffer1 = last;
     }
@@ -604,7 +604,7 @@ static int client_load(struct client_load_ctx *ctx) {
     }
 }
 
-static int client_gameshell_init_application(int32_t height, int32_t width, int32_t *draw_area_data) {
+static int client_gameshell_init_application(int32_t height, int32_t width, uint32_t *draw_area_data) {
     client.gameshell.screen_width = width;
     client.gameshell.screen_height = height;
     if (platform_frame_init(width, height) < 0) { // java: this.frame = new ViewBox(this.screenWidth, this.screenHeight, this);
@@ -778,7 +778,7 @@ static void client_update_flames(void) {
     }
 }
 
-static int32_t client_mix(int32_t alpha, int32_t src, int32_t dst) {
+static uint32_t client_mix(int32_t alpha, uint32_t src, uint32_t dst) {
     int32_t inv_alpha = 256 - alpha;
     return (
         (((src & 0xFF00FF) * inv_alpha + (dst & 0xFF00FF) * alpha) & 0xFF00FF00) +
@@ -833,13 +833,13 @@ static void client_draw_flames(void) {
         src_offset += step;
 
         for (int32_t x = step; x < 128; ++x) {
-            int32_t value = client.s.title.flame_buffer3[src_offset++];
+            uint32_t value = client.s.title.flame_buffer3[src_offset++];
 
             if (value != 0) {
                 uint32_t alpha = value;
                 uint32_t inv_alpha = 256 - value;
                 value = client.s.title.flame_gradient[value];
-                int32_t background = client.s.title.image_title0.data[dst_offset];
+                uint32_t background = client.s.title.image_title0.data[dst_offset];
 
                 client.s.title.image_title0.data[dst_offset] = (
                     (((value & 0xFF00FF) * alpha + (background & 0xFF00FF) * inv_alpha) & 0xFF00FF00) +
@@ -871,13 +871,13 @@ static void client_draw_flames(void) {
         dst_offset += offset;
 
         for (int32_t x = 0; x < step; ++x) {
-            int32_t value = client.s.title.flame_buffer3[src_offset++];
+            uint32_t value = client.s.title.flame_buffer3[src_offset++];
 
             if (value != 0) {
                 uint32_t alpha = value;
                 uint32_t inv_alpha = 256 - value;
                 value = client.s.title.flame_gradient[value];
-                int32_t background = client.s.title.image_title1.data[dst_offset];
+                uint32_t background = client.s.title.image_title1.data[dst_offset];
 
                 client.s.title.image_title1.data[dst_offset] = (
                     (((value & 0xFF00FF) * alpha + (background & 0xFF00FF) * inv_alpha) & 0xFF00FF00) +
@@ -971,7 +971,7 @@ int client_main(int argc, char **argv) {
         // SignLink.startpriv(InetAddress.getLocalHost());
 
         client_init();
-        static int32_t draw_area_data[503 * 765]; // TODO: Move into client.s.game?
+        static uint32_t draw_area_data[503 * 765]; // TODO: Move into client.s.game?
         return client_gameshell_init_application(503, 765, &draw_area_data[0]);
     } else {
         platform_print(x_STR_COMMA_LEN("Usage: node-id, port-offset, [lowmem/highmem], [free/members], storeid\n"));

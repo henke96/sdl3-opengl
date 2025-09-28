@@ -24,7 +24,7 @@ int platform_sleep_until_ns(int64_t time);
 
 struct SDL_Surface;
 typedef struct SDL_Surface *platform_image;
-platform_image platform_create_image(int32_t *data, int32_t width, int32_t height);
+platform_image platform_create_image(uint32_t *data, int32_t width, int32_t height);
 void platform_draw_image(platform_image image, int32_t x, int32_t y, int32_t width, int32_t height);
 
 typedef int platform_random_access_file;

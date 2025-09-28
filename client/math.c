@@ -91,6 +91,87 @@ uint64_t math_sqrt128(uint64_t high, uint64_t low, bool round) {
     return low_c;
 }
 
+static uint64_t math_sincos_add(uint64_t yyrr2, int i) {
+    if (yyrr2 == 0) {
+        int i2 = i << 1;
+        yyrr2 += (math_zzrr_scaled[i] + ((uint64_t)1 << i2)) >> (i2 + 1);
+    } else {
+        uint64_t ab_sqrt;
+        {
+            uint64_t a;
+            {
+                uint64_t high = yyrr2 >> 32;
+                uint64_t low = yyrr2 & 0xFFFFFFFF;
+                uint64_t highlow = high * low;
+                uint64_t temp = highlow + (low * low >> 32);
+                uint64_t yyrr2yyrr2_high = (
+                    (high * high) +
+                    (temp >> 32) +
+                    ((highlow + (temp & 0xFFFFFFFF)) >> 32)
+                );
+                a = yyrr2 - yyrr2yyrr2_high + yyrr2;
+            }
+
+            uint64_t b = math_zzrr_scaled[i - 1];
+            uint64_t ab_low = (a & 0xFFFFFFFF) * (b & 0xFFFFFFFF);
+            uint64_t temp = (a >> 32) * (b & 0xFFFFFFFF) + (ab_low >> 32);
+            ab_low = (ab_low & 0xFFFFFFFF) + ((temp & 0xFFFFFFFF) << 32);
+            uint64_t ab_high = temp >> 32;
+            temp = (b >> 32) * (a & 0xFFFFFFFF) + (ab_low >> 32);
+            ab_low = (ab_low & 0xFFFFFFFF) + ((temp & 0xFFFFFFFF) << 32);
+            ab_high += (a >> 32) * (b >> 32) + (temp >> 32);
+            ab_sqrt = math_sqrt128(ab_high, ab_low, true);
+        }
+
+        uint64_t cd_high;
+        {
+            uint64_t c = -yyrr2; // rrrr - yyrr2
+            uint64_t d = math_zzrr_scaled[i];
+            uint64_t temp = (
+                (c >> 32) * (d & 0xFFFFFFFF) +
+                ((c & 0xFFFFFFFF) * (d & 0xFFFFFFFF) >> 32)
+            );
+            cd_high = (
+                ((c >> 32) * (d >> 32)) +
+                (temp >> 32) +
+                (((d >> 32) * (c & 0xFFFFFFFF) + (temp & 0xFFFFFFFF)) >> 32)
+            );
+        }
+
+        yyrr2 += (ab_sqrt + (cd_high >> (i + 1)) + ((uint64_t)1 << (i - 1))) >> i;
+    }
+
+    return yyrr2;
+}
+
+// TODO
+int64_t math_atan(uint64_t yyrr2_goal) {
+    int64_t best_angle = 0;
+    uint64_t best_angle_diff = yyrr2_goal;
+
+    int64_t angle = 0;
+    uint64_t yyrr2 = 0;
+    for (int i = 0; i < 29; ++i) {
+        uint64_t new_yyrr2 = math_sincos_add(yyrr2, i);
+
+        uint64_t diff;
+        if (new_yyrr2 > yyrr2_goal) {
+            diff = new_yyrr2 - yyrr2_goal;
+            angle <<= 1;
+        } else {
+            diff = yyrr2_goal - new_yyrr2;
+            angle = (angle << 1) | 1;
+            yyrr2 = new_yyrr2;
+        }
+
+        if (diff < best_angle_diff) {
+            best_angle = angle | 1;
+            best_angle_diff = diff;
+        } else best_angle <<= 1;
+    }
+    return best_angle;
+}
+
 void math_sincos(int64_t angle, uint64_t scalescale, bool round, int64_t *out_sin, int64_t *out_cos) {
     int octant = (angle >> 29) & 0x7;
     if (octant & 0x1) angle = -angle;
@@ -99,56 +180,7 @@ void math_sincos(int64_t angle, uint64_t scalescale, bool round, int64_t *out_si
     int64_t angle_bit = 1 << 29;
     for (int i = 0; angle & (angle_bit - 1); ++i) {
         angle_bit >>= 1;
-        if (angle & angle_bit) {
-            if (yyrr2 == 0) {
-                int i2 = i << 1;
-                yyrr2 += (math_zzrr_scaled[i] + ((uint64_t)1 << i2)) >> (i2 + 1);
-            } else {
-                uint64_t ab_sqrt;
-                {
-                    uint64_t a;
-                    {
-                        uint64_t high = yyrr2 >> 32;
-                        uint64_t low = yyrr2 & 0xFFFFFFFF;
-                        uint64_t highlow = high * low;
-                        uint64_t temp = highlow + (low * low >> 32);
-                        uint64_t yyrr2yyrr2_high = (
-                            (high * high) +
-                            (temp >> 32) +
-                            ((highlow + (temp & 0xFFFFFFFF)) >> 32)
-                        );
-                        a = yyrr2 - yyrr2yyrr2_high + yyrr2;
-                    }
-
-                    uint64_t b = math_zzrr_scaled[i - 1];
-                    uint64_t ab_low = (a & 0xFFFFFFFF) * (b & 0xFFFFFFFF);
-                    uint64_t temp = (a >> 32) * (b & 0xFFFFFFFF) + (ab_low >> 32);
-                    ab_low = (ab_low & 0xFFFFFFFF) + ((temp & 0xFFFFFFFF) << 32);
-                    uint64_t ab_high = temp >> 32;
-                    temp = (b >> 32) * (a & 0xFFFFFFFF) + (ab_low >> 32);
-                    ab_low = (ab_low & 0xFFFFFFFF) + ((temp & 0xFFFFFFFF) << 32);
-                    ab_high += (a >> 32) * (b >> 32) + (temp >> 32);
-                    ab_sqrt = math_sqrt128(ab_high, ab_low, true);
-                }
-
-                uint64_t cd_high;
-                {
-                    uint64_t c = -yyrr2; // rrrr - yyrr2
-                    uint64_t d = math_zzrr_scaled[i];
-                    uint64_t temp = (
-                        (c >> 32) * (d & 0xFFFFFFFF) +
-                        ((c & 0xFFFFFFFF) * (d & 0xFFFFFFFF) >> 32)
-                    );
-                    cd_high = (
-                        ((c >> 32) * (d >> 32)) +
-                        (temp >> 32) +
-                        (((d >> 32) * (c & 0xFFFFFFFF) + (temp & 0xFFFFFFFF)) >> 32)
-                    );
-                }
-
-                yyrr2 += (ab_sqrt + (cd_high >> (i + 1)) + ((uint64_t)1 << (i - 1))) >> i;
-            }
-        }
+        if (angle & angle_bit) yyrr2 = math_sincos_add(yyrr2, i);
     }
 
     uint64_t scalescaleyyrr_high, scalescaleyyrr_low;
