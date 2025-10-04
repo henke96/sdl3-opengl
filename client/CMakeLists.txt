@@ -12,7 +12,7 @@ if(PLATFORM STREQUAL "sdl3")
     set(platform_sources platform/sdl3/platform.c)
 endif()
 
-add_executable(client ${platform_sources} client.c util.c)
+add_executable(client ${platform_sources} client.c util.c pix2d.c pix3d.c world.c world3d.c bzip2.c packet.c file_stream.c jagfile.c pix_font.c jpeg.c pix32.c pix_map.c pix8.c math.c)
 
 target_include_directories(client PRIVATE ${platform_directories})
 target_link_libraries(client PRIVATE ${platform_libraries})
