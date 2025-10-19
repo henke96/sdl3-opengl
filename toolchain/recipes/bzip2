@@ -13,7 +13,7 @@ export PATH="$OUT/make/bin:$PATH"
 gzip -d -c "$(recipe_download "https://sourceware.org/pub/bzip2/bzip2-$version.tar.gz" "$sha512")" | tar xf -
 cd "./bzip2-$version"
 
-make -j "$NUM_CPUS" install PREFIX="$OUT/$SCRIPT_NAME" CC="$CC" RANLIB=true
+make -j "$PARALLEL" install PREFIX="$OUT/$SCRIPT_NAME" CC="$CC" RANLIB=true
 
 rm -rf "$PWD"
 recipe_finish

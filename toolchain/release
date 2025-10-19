@@ -19,7 +19,7 @@ for compiler in $compilers; do
     toolchain="${compiler%%/*}"
     DEPENDENCIES="$DEPENDENCIES recipes/$toolchain/${toolchain}_sysroot"
 done
-DIR_DEPENDENCIES="../src"
+DIR_DEPENDENCIES="../client"
 
 recipe_start
 
@@ -27,13 +27,13 @@ for compiler in $compilers; do
     toolchain="${compiler%%/*}"
 
     unset cflags_extra
-    ! test "$toolchain" = aarch64-w64-mingw32-gcc || cflags_extra=-Wno-attributes # TODO: gcc bug?
+    ! test "$toolchain" = aarch64-w64-mingw32-gcc || cflags_extra="-Wno-attributes -O0" # TODO: gcc bugs?
 
     mkdir "$toolchain"
     (
         cd "$toolchain"
 
-        PARALLEL="$NUM_CPUS" \
+        PARALLEL="$PARALLEL" \
         DIRECT_BUILD=1 \
         PKG_CONFIG="$OUT/pkgconf/bin/pkgconf" \
         PKG_CONFIG_PATH="$OUT/${toolchain}_sysroot/usr/lib/pkgconfig:$OUT/${toolchain}_sysroot/usr/libdata/pkgconfig" \
@@ -41,7 +41,7 @@ for compiler in $compilers; do
         CC="$OUT/$compiler" \
         CFLAGS="-Os -Werror -Wall -Wextra -Wconversion -Wno-sign-conversion $cflags_extra" \
         LDFLAGS="-s" \
-        "$SCRIPT_DIR/../src/build.sh"
+        "$SCRIPT_DIR/../client/build.sh"
     )
 done
 

@@ -30,7 +30,7 @@ export NINJA="$OUT/samurai/bin/samu"
 meson setup --cross-file ./cross.txt -Dprefix=/usr --buildtype=plain -Dc_args="-ffile-prefix-map=$OUT=." \
 -Denable-wayland=false -Denable-x11=false -Denable-xkbregistry=false build
 
-meson compile -j "$NUM_CPUS" -C build
+meson compile -j "$PARALLEL" -C build
 DESTDIR="$OUT/$SCRIPT_NAME" meson install -C build
 
 rm -rf "$PWD"

@@ -17,7 +17,7 @@ export NINJA="$OUT/samurai/bin/samu"
 meson setup -Dprefix="$OUT/$SCRIPT_NAME" -Dlibdir=lib -Dpkg_config_path="$OUT/libexpat/lib/pkgconfig" \
 -Ddocumentation=false -Ddtd_validation=false -Dtests=false -Dlibraries=false build
 
-meson compile -j "$NUM_CPUS" -C build
+meson compile -j "$PARALLEL" -C build
 meson install -C build
 
 rm -rf "$PWD"

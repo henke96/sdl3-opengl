@@ -45,7 +45,7 @@ meson setup --cross-file ./cross.txt -Dprefix=/usr --buildtype=plain -Dc_args="-
 -Dpkg_config_path="$PWD/sysroot/usr/lib/pkgconfig:$PWD/sysroot/usr/share/pkgconfig" \
 -Ddbus=disabled -Ddemo=false build
 
-meson compile -j "$NUM_CPUS" -C build
+meson compile -j "$PARALLEL" -C build
 DESTDIR="$OUT/$SCRIPT_NAME" meson install -C build
 
 rm -rf "$PWD"

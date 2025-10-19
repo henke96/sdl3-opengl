@@ -20,7 +20,7 @@ cd ./linux-$linux_version
 # Allow building on FreeBSD (TODO upstream)
 sed -e 's/uapi-asm-generic archheaders archscripts/uapi-asm-generic archheaders/' ./Makefile > ./sed.temp
 mv ./sed.temp ./Makefile
-make -j "$NUM_CPUS" headers HOSTCC="$CC" ARCH="$linux_arch"
+make -j "$PARALLEL" headers HOSTCC="$CC" ARCH="$linux_arch"
 fails="$(find usr/include -type f -name "*.h" ! -exec sh -ec 'dest="$1/$2"; mkdir -p "${dest%/*}/"; cp "$2" "$dest"' sh "$OUT/$SCRIPT_NAME" {} \; -print)"
 test -z "$fails"
 
@@ -32,8 +32,8 @@ cd "./binutils-$binutils_version"
 ./configure --prefix="$OUT/$SCRIPT_NAME/usr" --target="$arch-x-linux-gnu" --with-sysroot="$OUT/$SCRIPT_NAME" --without-libiconv-prefix --without-libintl-prefix --without-zstd \
 --disable-dependency-tracking --disable-werror --disable-nls --enable-deterministic-archives CFLAGS="-O2"
 
-make -j "$NUM_CPUS" all-binutils all-ld all-gas
-make -j "$NUM_CPUS" install-binutils install-ld install-gas
+make -j "$PARALLEL" all-binutils all-ld all-gas
+make -j "$PARALLEL" install-binutils install-ld install-gas
 
 cd ..
 rm -rf "./binutils-$binutils_version"
@@ -53,8 +53,8 @@ cd ./gcc-build
 
 # Fake limits.h until we install real glibc headers.
 : > "$OUT/$SCRIPT_NAME/usr/include/limits.h"
-make -j "$NUM_CPUS" all-gcc
-make -j "$NUM_CPUS" install-gcc
+make -j "$PARALLEL" all-gcc
+make -j "$PARALLEL" install-gcc
 rm "$OUT/$SCRIPT_NAME/usr/include/limits.h"
 
 cd ..
@@ -72,22 +72,22 @@ export PATH="$OUT/$SCRIPT_NAME/usr/bin:$PATH"
 "../glibc-$glibc_version/configure" --prefix=/usr --build="$(sh scripts/config.guess)" --host="$arch-x-linux-gnu" --with-headers="$OUT/$SCRIPT_NAME/usr/include" --without-selinux --without-gd \
 --disable-mathvec --disable-werror CC= CPP= CXX=false CFLAGS="-O2 -ffile-prefix-map=$OUT=."
 
-make -j "$NUM_CPUS" csu/subdir_lib
-make -j "$NUM_CPUS" install-headers csu/install-lib DESTDIR="$OUT/$SCRIPT_NAME"
+make -j "$PARALLEL" csu/subdir_lib
+make -j "$PARALLEL" install-headers csu/install-lib DESTDIR="$OUT/$SCRIPT_NAME"
 
 cd ../gcc-build
 
 : > "$OUT/$SCRIPT_NAME/usr/include/gnu/stubs.h"
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 rm "$OUT/$SCRIPT_NAME/usr/include/gnu/stubs.h"
 
 cd ../glibc-build
 rm -rf "../gcc-$gcc_version"
 rm -rf ../gcc-build
 
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install DESTDIR="$OUT/$SCRIPT_NAME"
+make -j "$PARALLEL"
+make -j "$PARALLEL" install DESTDIR="$OUT/$SCRIPT_NAME"
 
 rm -rf "../glibc-$glibc_version"
 rm -rf "$PWD"

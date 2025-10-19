@@ -14,8 +14,8 @@ xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/bison/bison-$version.tar.xz
 cd "./bison-$version"
 
 ./configure --prefix="$OUT/$SCRIPT_NAME" --disable-dependency-tracking --disable-nls --disable-yacc --without-libiconv-prefix --without-libintl-prefix --without-libreadline-prefix --without-libtextstyle-prefix
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 rm -rf "$PWD"
 recipe_finish

@@ -14,8 +14,8 @@ gzip -d -c "$(recipe_download "https://ftp.gnu.org/gnu/mpc/mpc-$version.tar.gz" 
 cd "./mpc-$version"
 
 ./configure --prefix="$OUT/$SCRIPT_NAME" --with-gmp="$OUT/gmp" --with-mpfr="$OUT/mpfr" --disable-dependency-tracking
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 rm -rf "$PWD"
 recipe_finish

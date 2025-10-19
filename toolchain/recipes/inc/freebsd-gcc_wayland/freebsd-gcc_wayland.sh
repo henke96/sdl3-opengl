@@ -40,7 +40,7 @@ meson setup --cross-file ./cross.txt -Dprefix=/usr --buildtype=plain -Dc_args="-
 -Dpkg_config_path="$PWD/sysroot/usr/lib/pkgconfig:$PWD/sysroot/usr/libdata/pkgconfig" -Dbuild.pkg_config_path="$OUT/wayland-scanner/lib/pkgconfig:$OUT/wayland-scanner/libdata/pkgconfig" \
 -Ddocumentation=false -Ddtd_validation=false -Dtests=false -Dscanner=false build
 
-meson compile -j "$NUM_CPUS" -C build
+meson compile -j "$PARALLEL" -C build
 DESTDIR="$OUT/$SCRIPT_NAME" meson install -C build
 
 rm -rf "$PWD"

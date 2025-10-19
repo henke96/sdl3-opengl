@@ -14,8 +14,8 @@ xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/mpfr/mpfr-$version.tar.xz" 
 cd "./mpfr-$version"
 
 ./configure --prefix="$OUT/$SCRIPT_NAME" --with-gmp="$OUT/gmp" --disable-dependency-tracking
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 rm -rf "$PWD"
 recipe_finish

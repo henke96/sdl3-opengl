@@ -65,9 +65,13 @@ if test "$tc_toolchain" = none; then
     printf "Clearing PKG_CONFIG_SYSROOT_DIR\n"
     unset CMAKE_PREFIX_PATH
     printf "Clearing CMAKE_PREFIX_PATH\n"
+    test -z "$tc_ps1" || { PS1="$tc_ps1" && unset tc_ps1 && printf "Restoring PS1\n"; }
 
     printf "\nEnvironment restored\n"
     return
+else
+    tc_ps1="$PS1"
+    PS1="$tc_toolchain $PS1"
 fi
 
 tc_default="${tc_build_directory:-../sdl3-opengl-out}"
@@ -101,7 +105,7 @@ tc_prompt="Parallel jobs [$tc_default]: "
 if test "$tc_bash_read"; then read -rep "$tc_prompt" tc_option || { echo "ERROR"; return; } else { printf "$tc_prompt" && read -r tc_option; } || { echo "ERROR"; return; } fi
 tc_parallel_jobs="${tc_option:-$tc_default}"
 
-OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" NUM_CPUS="$tc_parallel_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sysroot" || return
+OUT="$tc_build_directory" DOWNLOADS="$tc_downloads_directory" PARALLEL="$tc_parallel_jobs" CC="$tc_host_c_compiler" CXX="$tc_host_cxx_compiler" "toolchain/recipes/$tc_toolchain/${tc_toolchain}_sysroot" || return
 tc_out="$(cd -- "$tc_build_directory" && pwd)"
 
 export CC="$tc_out/$tc_toolchain$tc_toolchain_cc"

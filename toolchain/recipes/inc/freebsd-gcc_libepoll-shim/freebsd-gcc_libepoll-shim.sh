@@ -23,7 +23,7 @@ END
 
 cmake -B build -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=./cross.cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_C_FLAGS="-ffile-prefix-map=$OUT=." \
 -DBUILD_TESTING=OFF -DALLOWS_ONESHOT_TIMERS_WITH_TIMEOUT_ZERO_EXITCODE=0
-cmake --build build -j "$NUM_CPUS"
+cmake --build build -j "$PARALLEL"
 DESTDIR="$OUT/$SCRIPT_NAME" cmake --install build
 
 rm -rf "$PWD"

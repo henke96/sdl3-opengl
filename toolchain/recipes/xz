@@ -14,7 +14,7 @@ gzip -d -c "$(recipe_download "https://github.com/tukaani-project/xz/releases/do
 cd "./xz-$version"
 
 ./configure --prefix="$OUT/$SCRIPT_NAME" --disable-nls --disable-dependency-tracking --without-libiconv-prefix --without-libintl-prefix
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL" install
 
 rm -rf "$PWD"
 recipe_finish

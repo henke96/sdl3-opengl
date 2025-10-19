@@ -316,6 +316,7 @@ static int client_get_jag_file(struct client_get_jag_file_ctx *ctx) {
         // TODO: if (this.fileStreams[0] != null) {
         file_stream_read_ctx_init(&ctx->read_ctx, ctx->file);
 
+        /* fallthrough */
         case 1:
         status = file_stream_read(&client.file_streams[0], &ctx->read_ctx);
         if (status <= 0) return status;
@@ -574,6 +575,7 @@ static int client_load(struct client_load_ctx *ctx) {
 
         client_get_jag_file_ctx_init(&ctx->get_jag_file_ctx, client.jag_checksum[1], "title", 1, "title screen", &client.jag_title);
 
+        /* fallthrough */
         case 1:
         status = client_get_jag_file(&ctx->get_jag_file_ctx);
         if (status <= 0) return status;

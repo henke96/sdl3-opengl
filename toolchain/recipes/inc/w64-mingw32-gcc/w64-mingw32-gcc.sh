@@ -18,8 +18,8 @@ cd "./binutils-$binutils_version"
 ./configure --prefix="$OUT/$SCRIPT_NAME" --target="$arch-w64-mingw32" --with-sysroot="$OUT/$SCRIPT_NAME" --without-libiconv-prefix --without-libintl-prefix --without-zstd \
 --disable-dependency-tracking --disable-werror --disable-nls --enable-deterministic-archives CFLAGS="-O2"
 
-make -j "$NUM_CPUS" all-binutils all-ld all-gas
-make -j "$NUM_CPUS" install-binutils install-ld install-gas
+make -j "$PARALLEL" all-binutils all-ld all-gas
+make -j "$PARALLEL" install-binutils install-ld install-gas
 
 cd ..
 rm -rf "./binutils-$binutils_version"
@@ -29,8 +29,8 @@ cd "./mingw-w64-v$mingw_version/mingw-w64-headers"
 
 ./configure --prefix="$OUT/$SCRIPT_NAME/$arch-w64-mingw32" --host="$arch-w64-mingw32"
 
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 cd ../..
 xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/gcc/gcc-$gcc_version/gcc-$gcc_version.tar.xz" "$gcc_sha512")" | tar xf -
@@ -46,8 +46,8 @@ cd ./gcc-build
 --enable-languages=c --disable-shared --disable-nls --disable-multilib --disable-libstdcxx --disable-bootstrap --disable-gcov --disable-lto --disable-libatomic --disable-decimal-float --disable-libgomp --disable-libquadmath --disable-libssp \
 LDFLAGS="-Wl,-rpath,$OUT/gmp/lib,-rpath,$OUT/mpfr/lib,-rpath,$OUT/mpc/lib" CFLAGS="-O2" CXXFLAGS="-O2" CFLAGS_FOR_TARGET="-O2 -ffile-prefix-map=$OUT=."
 
-make -j "$NUM_CPUS" all-gcc
-make -j "$NUM_CPUS" install-gcc
+make -j "$PARALLEL" all-gcc
+make -j "$PARALLEL" install-gcc
 
 cd "../mingw-w64-v$mingw_version/mingw-w64-crt"
 
@@ -55,14 +55,14 @@ export PATH="$OUT/$SCRIPT_NAME/bin:$PATH"
 ./configure --prefix="$OUT/$SCRIPT_NAME/$arch-w64-mingw32" --host="$arch-w64-mingw32" --disable-dependency-tracking $mingw_crt_configure_flags \
 CC= CPP= CXX=false CFLAGS="-O2 -ffile-prefix-map=$OUT=."
 
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 cd ../../gcc-build
 rm -rf "../mingw-w64-v$mingw_version"
 
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 rm -rf "../gcc-$gcc_version"
 rm -rf "$PWD"

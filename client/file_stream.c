@@ -38,6 +38,7 @@ int file_stream_read(struct file_stream *self, struct file_stream_read_ctx *ctx)
         if (file_stream_seek(ctx->file * 6, self->idx) != 0) return -1;
         platform_random_access_file_read_ctx_init(&ctx->s.s1.read_ctx, &ctx->temp[0], 6);
 
+        /* fallthrough */
         case 1:
         status = platform_random_access_file_read(self->idx, &ctx->s.s1.read_ctx);
         if (status <= 0) return status;

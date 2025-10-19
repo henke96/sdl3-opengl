@@ -14,8 +14,8 @@ xz -d -c "$(recipe_download "https://ftp.gnu.org/gnu/gmp/gmp-$version.tar.xz" "$
 cd "./gmp-$version"
 
 ./configure --prefix="$OUT/$SCRIPT_NAME"
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 rm -rf "$PWD"
 recipe_finish

@@ -1,18 +1,18 @@
-# SDL3 OpenGL
+# RS
 ## Simple Build
 `mkdir build`  
 `cd build`  
-`PARALLEL=8 CFLAGS=-Os LDFLAGS=-s ../src/build.sh`  
-`./sdl3-opengl.com`  
+`PARALLEL=8 CFLAGS=-Os LDFLAGS=-s ../client/build.sh`  
+`./client.com`  
 
 ## Cross Build
 `. ./setup_toolchain.sh`  
 `mkdir build-cross`  
 `cd build-cross`  
-`PARALLEL=8 CFLAGS=-Os LDFLAGS=-s ../src/build.sh`  
+`PARALLEL=8 CFLAGS=-Os LDFLAGS=-s ../client/build.sh`  
 
 ## Generate a Makefile
 `mkdir build-dev`  
 `cd build-dev`  
-`MAKEFILE=1 PARALLEL=8 CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address" ../src/build.sh`  
+`MAKEFILE=1 PARALLEL=8 CFLAGS="-g -Wall -Wextra -Wconversion -Wno-sign-conversion -fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address" ../client/build.sh`  
 `make`  

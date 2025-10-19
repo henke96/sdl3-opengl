@@ -18,8 +18,8 @@ cd "./binutils-$binutils_version"
 ./configure --prefix="$OUT/$SCRIPT_NAME/usr" --target="$arch-x-freebsd$freebsd_version" --with-sysroot="$OUT/$SCRIPT_NAME" --without-libiconv-prefix --without-libintl-prefix --without-zstd \
 --disable-dependency-tracking --disable-werror --disable-nls --enable-deterministic-archives CFLAGS="-O2"
 
-make -j "$NUM_CPUS" all-binutils all-ld all-gas
-make -j "$NUM_CPUS" install-binutils install-ld install-gas
+make -j "$PARALLEL" all-binutils all-ld all-gas
+make -j "$PARALLEL" install-binutils install-ld install-gas
 
 cd ..
 rm -rf "./binutils-$binutils_version"
@@ -37,8 +37,8 @@ cd ./gcc-build
 --enable-languages=c --disable-shared --disable-nls --disable-multilib --disable-libstdcxx --disable-bootstrap --disable-gcov --disable-lto --disable-libatomic --disable-decimal-float --disable-libgomp --disable-libquadmath --disable-libssp \
 --disable-fixincludes LDFLAGS="-Wl,-rpath,$OUT/gmp/lib,-rpath,$OUT/mpfr/lib,-rpath,$OUT/mpc/lib" CFLAGS="-O2" CXXFLAGS="-O2" CFLAGS_FOR_TARGET="-O2 -ffile-prefix-map=$OUT=."
 
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install
+make -j "$PARALLEL"
+make -j "$PARALLEL" install
 
 rm -rf "../gcc-$gcc_version"
 rm -rf "$PWD"

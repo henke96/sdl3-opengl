@@ -13,8 +13,8 @@ cd "./libffi-$version"
 
 ./configure --prefix=/usr --build="$(sh ./config.guess)" --host="$arch-x-linux-gnu" --disable-dependency-tracking CC= CPP= CXX=no CFLAGS="-ffile-prefix-map=$OUT=."
 
-make -j "$NUM_CPUS"
-make -j "$NUM_CPUS" install DESTDIR="$OUT/$SCRIPT_NAME"
+make -j "$PARALLEL"
+make -j "$PARALLEL" install DESTDIR="$OUT/$SCRIPT_NAME"
 
 rm -rf "$PWD"
 recipe_finish

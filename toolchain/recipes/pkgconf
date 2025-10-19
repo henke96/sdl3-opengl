@@ -17,7 +17,7 @@ export NINJA="$OUT/samurai/bin/samu"
 meson setup -Dprefix="$OUT/$SCRIPT_NAME" -Dlibdir=lib -Ddefault_library=static \
 -Dtests=disabled -Dwith-system-includedir=/path/that/doesnt/exist -Dwith-system-libdir=/path/that/doesnt/exist build
 
-meson compile -j "$NUM_CPUS" -C build
+meson compile -j "$PARALLEL" -C build
 meson install -C build
 
 ln -s pkgconf "$OUT/$SCRIPT_NAME/bin/pkg-config"
