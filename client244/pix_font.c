@@ -3,7 +3,7 @@
 #include "pix_font.h"
 #include "packet.h"
 #include "pix2d.h"
-#include "x.h"
+#include "lib/x.h"
 
 static int pix_font_char_lookup[256];
 

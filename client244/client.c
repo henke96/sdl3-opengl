@@ -1,7 +1,7 @@
 #include "platform.h"
 #include "client.h"
-#include "x.h"
-#include "util.h"
+#include "lib/x.h"
+#include "lib/util.h"
 #include "pix2d.h"
 #include "pix3d.h"
 #include "pix_map.h"
@@ -12,7 +12,7 @@
 #include "pix_font.h"
 #include "pix32.h"
 #include "pix8.h"
-#include "math.h"
+#include "lib/math.h"
 
 struct client_gameshell {
     struct pix_map draw_area;

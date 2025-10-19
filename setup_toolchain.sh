@@ -74,7 +74,7 @@ else
     PS1="$tc_toolchain $PS1"
 fi
 
-tc_default="${tc_build_directory:-../sdl3-opengl-out}"
+tc_default="${tc_build_directory:-../rs-out}"
 tc_prompt="Build directory [$tc_default]: "
 if test "$tc_bash_read"; then read -rep "$tc_prompt" tc_option || { echo "ERROR"; return; } else { printf "$tc_prompt" && read -r tc_option; } || { echo "ERROR"; return; } fi
 eval tc_build_directory="$tc_option"

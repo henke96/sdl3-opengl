@@ -1,10 +1,10 @@
 #include "platform.h"
 #include "jagfile.h"
 #include "pix32.h"
-#include "jpeg.h"
 #include "pix2d.h"
 #include "packet.h"
-#include "x.h"
+#include "lib/jpeg.h"
+#include "lib/x.h"
 
 void pix32_init(struct pix32 *self, int32_t width, int32_t height, uint32_t *data) {
     self->pixels = data;

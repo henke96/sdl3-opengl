@@ -2,7 +2,7 @@
 #include "jagfile.h"
 #include "packet.h"
 #include "bzip2.h"
-#include "util.h"
+#include "lib/util.h"
 
 // java: constructor and unpack()
 // NOTE: `src` must be the latest allocation, and may be overwritten!

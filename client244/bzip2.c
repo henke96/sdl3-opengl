@@ -1,5 +1,5 @@
 #include "platform.h"
-#include "x.h"
+#include "lib/x.h"
 #include "bzip2.h"
 
 #define bzip2_MTFA_SIZE 4096

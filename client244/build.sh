@@ -38,7 +38,7 @@ fi
 CC="${CC:-cc}"
 PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
 
-OUT_NAME="${OUT_NAME:-client.com}"
+OUT_NAME="${OUT_NAME:-client244.com}"
 PARALLEL="${PARALLEL:-1}"
 MAKEFILE_DEP_CFLAGS="${MAKEFILE_DEP_CFLAGS:-"-MD -MP"}"
 test "$MAKEFILE" || MAKEFILE_DEP_CFLAGS=
@@ -58,7 +58,6 @@ fi
 
 sources="$platform_sources \
 client \
-util \
 pix2d \
 pix3d \
 world \
@@ -68,11 +67,12 @@ packet \
 file_stream \
 jagfile \
 pix_font \
-jpeg \
 pix32 \
 pix_map \
 pix8 \
-math \
+lib/math \
+lib/jpeg \
+lib/util \
 "
 
 compile() {

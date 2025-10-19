@@ -2,7 +2,7 @@
 #include "jagfile.h"
 #include "pix8.h"
 #include "packet.h"
-#include "x.h"
+#include "lib/x.h"
 
 // NOTE: Caller must add ".dat" suffix.
 void pix8_init(struct pix8 *self, struct jagfile *jagfile, const char *name, int32_t name_length, int32_t sprite) {

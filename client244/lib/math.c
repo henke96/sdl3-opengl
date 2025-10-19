@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "math.h"
 
 // rr = 2**32
 // zz[0] = 2 * rr

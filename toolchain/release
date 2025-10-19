@@ -19,7 +19,7 @@ for compiler in $compilers; do
     toolchain="${compiler%%/*}"
     DEPENDENCIES="$DEPENDENCIES recipes/$toolchain/${toolchain}_sysroot"
 done
-DIR_DEPENDENCIES="../client"
+DIR_DEPENDENCIES="../client244"
 
 recipe_start
 
@@ -41,7 +41,7 @@ for compiler in $compilers; do
         CC="$OUT/$compiler" \
         CFLAGS="-Os -Werror -Wall -Wextra -Wconversion -Wno-sign-conversion $cflags_extra" \
         LDFLAGS="-s" \
-        "$SCRIPT_DIR/../client/build.sh"
+        "$SCRIPT_DIR/../client244/build.sh"
     )
 done
 

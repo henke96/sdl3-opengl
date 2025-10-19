@@ -1,6 +1,6 @@
 #include "platform.h"
 #include "../../client.h"
-#include "../../x.h"
+#include "../../lib/x.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
